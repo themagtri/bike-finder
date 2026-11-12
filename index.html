@@ -190,6 +190,7 @@ section.screen.on{display:block}
 .fit-v small{font-size:18px;color:var(--muted)}
 .fit{font-size:12px;color:var(--muted)}
 .fit b{color:var(--text);font-weight:500}
+.fit-note{display:block;font-size:11px;opacity:.8;margin-top:3px}
 .fit.ok{color:#9fe0a8}
 .fit.no{color:#e6b07a}
 [hidden]{display:none!important}
@@ -704,7 +705,7 @@ const SIZE_ORDER=["3XS","XXS","XS","S","SM","M","ML","L","XL","XXL"];
 function sizeFit(b){
   const r=recommend(); if(!r) return "";
   // size is advice only: never a filter and no stock claim; the rider checks availability with the seller
-  return `<div class="fit">המידה המתאימה לך: <b>${r.L}</b></div>`;
+  return `<div class="fit">המידה המתאימה לך: <b>${r.L}</b><span class="fit-note">הערכה לפי מידות הגוף. יש לאמת בחנות או אצל מתאים אופניים (Bike Fit) מוסמך.</span></div>`;
 }
 function bodyValid(){return !!S.gender&&!!S.h&&S.h>=120&&S.h<=220&&(!S.leg||(S.leg>=50&&S.leg<=110&&S.leg<S.h*.6));}
 function bodyUpdate(){$("#toSearch").disabled=!bodyValid();$$(".tab")[2].disabled=!bodyValid();$$(".tab")[3].disabled=!bodyValid();chips();drawAvatar();renderFit();}
