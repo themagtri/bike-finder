@@ -244,7 +244,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 .bcard header{display:flex;align-items:center;gap:10px}
 .bcard header .blogo{width:34px;height:34px}
 .bcard header .blogo img{width:24px;height:24px}
-.bcard .bb{font-size:14px}
+.bcard .bb{font-size:15px;font-weight:600}
 .bcard .seller{font-size:12px;color:var(--muted)}
 .tbadge{margin-inline-start:auto;font-size:11px;border:1px solid var(--line-strong);border-radius:999px;padding:2px 9px;white-space:nowrap;color:var(--muted)}
 .tbadge.t3,.tbadge.t4{border-color:#fff;color:#fff}
@@ -862,11 +862,11 @@ function card(b,missing){
     b.p==null&&b.pe?`המוכר לא מפרסם מחיר · הערכה: מ-₪${fmt(b.pe)}`:"");
   const rows=[
     ["הילוכים",b.g||"—"],
-    ["החלפה",b.es===1?"חשמלית":b.es===0?"מכנית":"—"],
+    ["מערכת הילוכים",b.es===1?"חשמלית":b.es===0?"מכנית":"—"],
     ["שלדה",MAT[b.f]||"—"],
     (b.s==="mtb"||b.s==="emtb")?["שיכוך",SUS_HE[b.susp]||"—"]:["גלגלים",b.cw===1?"קרבון":b.cw===0?"אלומיניום":"—"]];
   return `<article class="bcard">
-    <header>${LOGOS[b.b]?brandLogo(b.b,true):brandLogo(b.b)}<div>${LOGOS[b.b]?"":`<div class="bb">${b.b}</div>`}<div class="seller">${b.usd?"רכישה ישירה · גרמניה":b.src}</div></div>
+    <header>${LOGOS[b.b]?brandLogo(b.b,true):brandLogo(b.b)}<div><div class="bb">${b.b}</div><div class="seller">${b.usd?"רכישה ישירה מהיצרן · גרמניה":`משווק בישראל: ${b.src}`}</div></div>
       ${b.t?`<span class="tbadge t${b.t}">רמה ${b.t} · ${TIERS[b.t-1].he}</span>`:""}</header>
     <h3>${b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"")}</h3>
     <div class="price-row"><div class="price">${price}</div>${b.w?`<div class="wt"><b>${b.w}</b> ק"ג</div>`:""}</div>${sub?`<div class="psub">${sub}</div>`:""}
