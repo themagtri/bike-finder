@@ -205,6 +205,8 @@ section.screen.on{display:block}
 .opt:disabled,.mode:disabled{opacity:.35;cursor:not-allowed}
 /* results */
 .res-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.res-actions{display:flex;gap:10px;flex-wrap:wrap}
+.end-actions{margin-top:40px;padding-top:28px;border-top:1px solid var(--line)}
 .filters{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:18px}
 .filters summary{cursor:pointer;padding:14px 0;color:var(--muted);font-size:14px;list-style:none}
 .filters summary::before{content:"⌄ ";}
@@ -384,7 +386,10 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
         <h1 id="resTitle">תוצאות</h1>
         <p class="lead" id="resLead" style="margin-bottom:0"></p>
       </div>
-      <button class="btn ghost" data-go="3">שינוי העדפות</button>
+      <div class="res-actions">
+        <button class="btn ghost" data-go="3">שינוי העדפות</button>
+        <button class="btn ghost restart">חיפוש חדש ↺</button>
+      </div>
     </div>
     <details class="filters" id="filters" open>
       <summary>סינון ומיון</summary>
@@ -435,6 +440,10 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
     <div class="grid" id="grid"></div>
     <div style="text-align:center;margin-top:24px"><button class="btn ghost" id="more">הצג עוד</button></div>
     <div id="moreWrap"></div>
+    <div class="actions end-actions">
+      <button class="btn ghost" data-go="3">שינוי העדפות</button>
+      <button class="btn restart">חזרה להתחלה · חיפוש חדש ↺</button>
+    </div>
   </section>
 </div>
 
@@ -715,6 +724,14 @@ const wLabel=w=>w[3]>=99?`מעל ${w[2]} ק"ג`:w[2]===0?`עד ${w[3]} ק"ג`:`$
 const MAT={carbon:"קרבון",aluminum:"אלומיניום",steel:"פלדה",titanium:"טיטניום"};
 Object.assign(S,{cw:"any",fm:"any",sh:"any",sus:"any",wcat:null,hidden:new Set(),sort:"price",inclUnk:false,shown:24,rMin:null,rMax:null});
 const inStyle=()=>BIKES.filter(b=>b.s===S.style);
+/* start a new search: back to the riding-style ring; body measurements are kept, all preferences reset */
+function startOver(){
+  Object.assign(S,{style:null,disc:"any",mode:"budget",bMin:null,bMax:null,tiers:new Set(),cw:"any",fm:"any",sh:"any",sus:"any",
+    hidden:new Set(),sort:"price",shown:24,rMin:null,rMax:null,openU:false,shownU:24});
+  ["#bMin","#bMax"].forEach(s=>{const e=$(s); if(e) e.value="";});
+  go(1); window.scrollTo({top:0,behavior:"smooth"});
+}
+document.addEventListener("click",e=>{if(e.target.closest(".restart")) startOver();});
 const hasTiers=()=>rowsFor().length>0;
 
 /* wheel icon: deep carbon rim / shallow alloy rim / either */
