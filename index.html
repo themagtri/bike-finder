@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מוצא האופניים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Palette after colnago.com: near-black, graphite cards, white type, grey secondary, hairline dividers */
+:root{
+  --bg:#141414; --card:#1d1d1d; --card-2:#2b2b2b; --text:#ffffff; --muted:#a0a0a0; --line:rgba(255,255,255,.12);
+  --line-strong:rgba(255,255,255,.28); --btn:#ffffff; --btn-ink:#141414; --glow:rgba(255,255,255,.22);
+  --radius:6px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Heebo",system-ui,sans-serif;font-weight:400;line-height:1.55;min-height:100vh;
+  background-image:radial-gradient(90vw 60vh at 110vw -10vh, var(--glow), transparent 60%),
+                   radial-gradient(70vw 50vh at -20vw 110vh, rgba(255,255,255,.12), transparent 60%);
+  background-attachment:fixed}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
+/* top bar */
+header.top{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-weight:500;font-size:17px;letter-spacing:.2px}
+.logo b{font-weight:600}
+.tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+@media (max-width:560px){.tabs{gap:16px}.tabs .tab{white-space:nowrap}}
+.tab{background:none;border:0;padding:14px 0;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap;font-size:15px}
+.tab.on{color:var(--text)}
+.tab.on::after{content:"";position:absolute;inset:auto 0 -1px 0;height:1px;background:var(--text)}
+.tab:disabled{cursor:default;opacity:.45}
+.tab span{font-variant-numeric:tabular-nums;margin-inline-end:8px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:-20px 0 28px}
+.chip{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+.chip strong{color:var(--text);font-weight:500}
+h1{font-weight:400;font-size:clamp(28px,4.2vw,44px);letter-spacing:-.4px;margin:0 0 8px}
+.lead{color:var(--muted);margin:0 0 32px;font-size:16px;max-width:620px}
+section.screen{display:none;animation:fade .35s ease}
+section.screen.on{display:block}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.card{background:var(--card);border-radius:var(--radius);padding:24px}
+.btn{border:0;border-radius:var(--radius);padding:14px 28px;cursor:pointer;background:var(--btn);color:var(--btn-ink);font-weight:500;font-size:15px}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line-strong)}
+.actions{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-top:28px}
+
+/* ---- 1: photo ring ---- */
+.ring-stage{display:grid;grid-template-columns:1fr minmax(220px,300px);gap:32px;align-items:center}
+@media (max-width:860px){.ring-stage{grid-template-columns:1fr}}
+.ring{width:min(640px,100%);height:auto;margin:0 auto;display:block;direction:ltr;overflow:visible}
+.seg{cursor:pointer;outline:none}
+.seg .shape{transition:transform .35s cubic-bezier(.2,.7,.2,1);transform-origin:300px 300px}
+.seg image{transition:filter .35s ease}
+.seg .shade{transition:opacity .35s ease}
+.ring:hover .seg:not(:hover) image{filter:grayscale(.85) brightness(.55)}
+.seg:hover .shape,.seg:focus-visible .shape{transform:scale(1.035)}
+.seg:hover .shade,.seg:focus-visible .shade{opacity:.35}
+.seg:focus-visible .edge{stroke:#fff;stroke-width:2}
+.seg text{fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:3px}
+.seg .lbl{font-size:21px;font-weight:500}
+.seg .cnt{font-size:13px;fill:#e6e6e6}
+.side-list{display:grid;border-top:1px solid var(--line)}
+.side-list button{display:flex;justify-content:space-between;align-items:center;background:none;border:0;border-bottom:1px solid var(--line);padding:16px 2px;cursor:pointer;text-align:right}
+.side-list button:hover{background:rgba(255,255,255,.03)}
+.side-list .nm{font-size:17px}
+.side-list small{display:block;color:var(--muted);font-size:13px}
+.side-list .go{width:28px;height:28px;border-radius:50%;border:1px solid var(--line-strong);display:grid;place-items:center;font-size:13px;color:var(--muted);flex:none}
+.credit{color:var(--muted);font-size:12px;margin-top:14px}
+
+/* ---- 2: avatar ---- */
+.body-grid{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:28px;align-items:start}
+@media (max-width:820px){.body-grid{grid-template-columns:1fr}}
+.avatar-card{background:radial-gradient(60% 45% at 50% 40%, #3a3a3a 0%, #1d1d1d 70%);display:grid;place-items:center;padding:16px}
+.avatar{width:100%;max-width:360px;height:auto;direction:ltr}
+.avatar .ruler line{stroke:rgba(255,255,255,.35);stroke-width:1}
+.avatar .ruler text{fill:var(--muted);font-size:10px;font-family:Heebo,sans-serif}
+.avatar .fig{transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.avatar .meas{stroke:rgba(255,255,255,.4);stroke-width:1.5;stroke-dasharray:4 5;transition:all .25s}
+.avatar .meas.on{stroke:#fff;stroke-dasharray:none;stroke-width:2.2}
+.avatar .mlabel{font-size:13px;fill:var(--muted);font-family:Heebo,sans-serif}
+.avatar .mlabel.on{fill:#fff;font-weight:500}
+.avatar .dot{fill:#fff}
+.form{display:grid;gap:26px}
+.field .t{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;font-size:15px}
+.field .t em{font-style:normal;color:var(--muted);font-size:13px}
+.seg-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg-toggle button{padding:16px;border-radius:var(--radius);border:1px solid var(--line-strong);background:transparent;cursor:pointer;font-size:16px}
+.seg-toggle button[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.num{display:flex;align-items:center;border-bottom:1px solid var(--line-strong)}
+.num:focus-within{border-color:#fff}
+.num input{flex:1;border:0;background:transparent;padding:10px 0;font-size:26px;font-weight:300;outline:none;width:100%}
+.num input::placeholder{color:#5a5a5a}
+.num span{color:var(--muted)}
+.help{color:var(--muted);font-size:13px;margin-top:8px}
+.err{color:#ff8a7a;font-size:13px;min-height:18px;margin-top:4px}
+
+/* ---- 3: search ---- */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+@media (max-width:640px){.modes{grid-template-columns:1fr}}
+.mode{border:1px solid var(--line-strong);background:transparent;border-radius:var(--radius);padding:20px;text-align:right;cursor:pointer}
+.mode[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.mode[aria-pressed="true"] p{color:#555}
+.mode h3{margin:0 0 4px;font-size:19px;font-weight:500}
+.mode p{margin:0;color:var(--muted);font-size:14px}
+.panel{display:none}.panel.on{display:block}
+.label{font-size:15px;margin-bottom:12px}
+.budget-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.budget-chips button{border:1px solid var(--line-strong);background:transparent;border-radius:999px;padding:9px 16px;cursor:pointer;font-size:14px}
+.budget-chips button[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.range-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 28px}
+@media (max-width:640px){.tiers{grid-template-columns:repeat(2,1fr)}}
+.tier{border:1px solid var(--line-strong);border-radius:var(--radius);padding:16px;background:transparent;cursor:pointer;text-align:right}
+.tier[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.tier[aria-pressed="true"] .lvl,.tier[aria-pressed="true"] .en{color:#666}
+.tier .lvl{font-size:12px;color:var(--muted)}
+.tier .nm{font-size:22px;font-weight:400;margin:2px 0}
+.tier .en{font-size:12px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase}
+.spec{border-top:1px solid var(--line)}
+.spec-head{display:grid;grid-template-columns:1.2fr repeat(4,1fr);gap:12px;padding:12px 0;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line)}
+.spec-row{display:grid;grid-template-columns:1.2fr repeat(4,1fr);gap:12px;padding:16px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:start}
+.spec-row .rk{font-size:15px}
+.spec-row.dim{opacity:.38}
+.spec-row .c.sel{color:#141414;background:#fff;border-radius:4px;padding:2px 8px;margin:-2px -8px}
+@media (max-width:700px){
+  .spec-head{display:none}
+  .spec-row{grid-template-columns:1fr 1fr}
+  .spec-row .rk{grid-column:1/-1;margin-bottom:4px}
+  .spec-row .c::before{content:attr(data-t);display:block;color:var(--muted);font-size:12px}
+}
+.note{color:var(--muted);font-size:14px;border-inline-start:2px solid var(--line-strong);padding:4px 12px;margin:0 0 20px}
+.count{font-size:14px;color:var(--muted);margin:22px 0 0}
+.count b{color:var(--text);font-size:28px;font-weight:300;margin-inline-end:6px}
+.results{border-top:1px solid var(--line);margin-top:18px}
+.res{display:grid;grid-template-columns:1fr auto;gap:2px 16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.res .nm{font-size:16px}
+.res .nm a{text-decoration:none}
+.res .nm a:hover{text-decoration:underline}
+.res .meta{color:var(--muted);font-size:13px}
+.res .pr{font-size:17px;white-space:nowrap}
+/* photo option buttons (shifting type, frame material) */
+.opt.photo{position:relative;min-height:150px;justify-content:flex-end;align-items:flex-start;text-align:right;padding:16px;overflow:hidden;
+  background-size:cover;background-position:center;border-color:transparent;color:#fff;isolation:isolate}
+.opt.photo::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.78));transition:background .25s}
+.opt.photo span{font-size:18px}
+.opt.photo small{color:#d8d8d8}
+.opt.photo:hover::before{background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.6))}
+.opt.photo[aria-pressed="true"]{background-color:transparent;background-size:cover;background-position:center;color:#fff;border:2px solid #fff;box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+.opt.photo[aria-pressed="true"] small{color:#fff}
+.opt.photo[aria-pressed="true"]::after{content:"✓";position:absolute;top:10px;left:12px;width:26px;height:26px;border-radius:50%;background:#fff;color:#141414;display:grid;place-items:center;font-size:14px}
+/* tier cards: level meter + sample groupset */
+.tier{position:relative;overflow:hidden}
+.tier .meter{display:flex;gap:4px;align-items:flex-end;height:22px;margin-bottom:10px}
+.tier .meter i{width:8px;border-radius:2px;background:var(--line-strong)}
+.tier .meter i:nth-child(1){height:7px}.tier .meter i:nth-child(2){height:12px}.tier .meter i:nth-child(3){height:17px}.tier .meter i:nth-child(4){height:22px}
+.tier .meter i.on{background:#fff}
+.tier[aria-pressed="true"] .meter i.on{background:#141414}
+.tier[aria-pressed="true"] .meter i{background:#cfcfcf}
+.tier .ex{margin-top:8px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.tier[aria-pressed="true"] .ex{color:#555;border-color:#ddd}
+.tier.lv4:not([aria-pressed="true"]){background:linear-gradient(135deg,rgba(255,255,255,.07),transparent 60%)}
+.tier.lv3:not([aria-pressed="true"]){background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 60%)}
+/* MTB sub-type strip: one long rectangle split into photo panels; the hovered panel widens */
+.strip{display:flex;height:440px;border-radius:var(--radius);overflow:hidden;gap:2px;background:#000}
+.disc{position:relative;flex:1;min-width:0;border:0;padding:0;cursor:pointer;color:#fff;text-align:right;background:#222 center/cover no-repeat;
+  transition:flex .45s cubic-bezier(.2,.7,.2,1), filter .3s}
+.disc::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 30%,rgba(0,0,0,.82) 100%)}
+.strip:hover .disc{filter:grayscale(.6) brightness(.7)}
+.strip .disc:hover,.strip .disc:focus-visible{flex:1.7;filter:none}
+.disc:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+.disc .in{position:absolute;inset:auto 0 0 0;padding:20px;display:grid;gap:4px}
+.disc h3{margin:0;font-size:24px;font-weight:400}
+.disc .tr{font-size:13px;letter-spacing:.3px;color:#ddd}
+.disc p{margin:0;font-size:13px;color:#cfcfcf;line-height:1.45;max-width:260px}
+.disc .n{font-size:12px;color:#aaa}
+.disc.any{background:repeating-linear-gradient(135deg,#1d1d1d 0 14px,#232323 14px 28px)}
+@media (max-width:760px){.strip{flex-direction:column;height:auto}.disc{min-height:150px}.strip .disc:hover{flex:1}}
+/* preferences */
+.fitbox:empty{display:none}
+.fitbox{border:1px solid var(--line-strong);border-radius:var(--radius);padding:16px 18px}
+.fit-k{font-size:13px;color:var(--muted)}
+.fit-v{font-size:40px;font-weight:300;line-height:1.1;margin:4px 0}
+.fit-v small{font-size:18px;color:var(--muted)}
+.fit{font-size:12px;color:var(--muted)}
+.fit b{color:var(--text);font-weight:500}
+.fit.ok{color:#9fe0a8}
+.fit.no{color:#e6b07a}
+[hidden]{display:none!important}
+.pref-grid{display:grid;grid-template-columns:1fr;gap:28px;margin-top:36px;padding-top:28px;border-top:1px solid var(--line)}
+@media (max-width:820px){.pref-grid{grid-template-columns:1fr}}
+.opt-row{display:flex;gap:8px}
+.opt-row.wrap{flex-wrap:wrap}
+.opt{display:flex;align-items:center;gap:10px;border:1px solid var(--line-strong);background:transparent;border-radius:var(--radius);padding:12px 14px;cursor:pointer;text-align:right;color:var(--text)}
+.opt.tall{flex:1;flex-direction:column;justify-content:center;padding:16px 10px;text-align:center}
+.opt small{display:block;color:var(--muted);font-size:12px}
+.opt[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.opt[aria-pressed="true"] small{color:#555}
+.opt-row.small{flex-wrap:wrap}
+.opt-row.small .opt{padding:7px 12px;font-size:13px;white-space:nowrap}
+.opt:disabled,.mode:disabled{opacity:.35;cursor:not-allowed}
+/* results */
+.res-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.filters{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:18px}
+.filters summary{cursor:pointer;padding:14px 0;color:var(--muted);font-size:14px;list-style:none}
+.filters summary::before{content:"⌄ ";}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding:4px 0 22px}
+@media (max-width:1000px){.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.fgrid{grid-template-columns:1fr}}
+.fbox.wide{grid-column:1/-1}
+.flabel{font-size:13px;color:var(--muted);margin-bottom:10px;display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+.flabel span{color:var(--text);font-variant-numeric:tabular-nums}
+.linkbtn{background:none;border:0;color:var(--text);text-decoration:underline;cursor:pointer;font-size:13px;padding:0}
+.dual{position:relative;height:36px;direction:ltr}
+.dual .track{position:absolute;inset:16px 0 auto 0;height:3px;background:var(--line-strong);border-radius:2px}
+.dual .fill{position:absolute;top:0;bottom:0;background:#fff;border-radius:2px}
+.dual input{position:absolute;inset:0;width:100%;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none;height:36px}
+.dual input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:0;cursor:grab;box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+.dual input::-moz-range-thumb{pointer-events:auto;width:20px;height:20px;border-radius:50%;background:#fff;border:0;cursor:grab}
+.dual input::-webkit-slider-runnable-track{background:none}
+.brand-chips{display:flex;flex-wrap:wrap;gap:8px}
+.bchip{display:flex;align-items:center;gap:8px;border:1px solid var(--line-strong);background:transparent;border-radius:999px;padding:4px 12px 4px 6px;cursor:pointer;font-size:13px;color:var(--text)}
+.bchip em{font-style:normal;color:var(--muted);font-size:12px}
+.bchip[aria-pressed="false"]{opacity:.35;text-decoration:line-through}
+.blogo{width:26px;height:26px;border-radius:50%;background:#fff;display:inline-grid;place-items:center;overflow:hidden;flex:none;position:relative}
+.blogo::after{content:attr(data-ini);color:#141414;font-size:10px;font-weight:600;position:absolute}
+.blogo img{width:22px;height:22px;object-fit:contain;position:relative;z-index:1;background:#fff}
+.blogo.img::after{content:none}
+.wlogo{display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:4px;height:34px;padding:0 10px;min-width:84px;flex:none}
+.wlogo img{max-height:20px;max-width:96px;object-fit:contain}
+footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.unknown-note{color:var(--muted);font-size:13px;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.bcard{background:var(--card);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;border:1px solid transparent;transition:border-color .2s, transform .2s}
+.bcard:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+.bcard header{display:flex;align-items:center;gap:10px}
+.bcard header .blogo{width:34px;height:34px}
+.bcard header .blogo img{width:24px;height:24px}
+.bcard .bb{font-size:14px}
+.bcard .seller{font-size:12px;color:var(--muted)}
+.tbadge{margin-inline-start:auto;font-size:11px;border:1px solid var(--line-strong);border-radius:999px;padding:2px 9px;white-space:nowrap;color:var(--muted)}
+.tbadge.t3,.tbadge.t4{border-color:#fff;color:#fff}
+.tbadge.t4{background:#fff;color:#141414}
+.bcard h3{margin:4px 0 0;font-weight:400;font-size:18px;line-height:1.3;min-height:2.6em}
+.bcard .price{font-size:24px;font-weight:300}
+.price-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.wt{border:1px solid var(--line-strong);border-radius:999px;padding:2px 10px;font-size:13px;color:var(--muted);white-space:nowrap}
+.wt b{color:var(--text);font-size:16px;font-weight:500}
+.bcard .psub{font-size:12px;color:var(--muted);margin-top:-6px}
+.bcard dl{margin:4px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;border-top:1px solid var(--line);padding-top:12px}
+.bcard dl div{min-width:0}
+.bcard dt{font-size:11px;color:var(--muted)}
+.bcard dd{margin:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.miss{font-size:12px;color:#e6b07a;border:1px dashed rgba(230,176,122,.5);border-radius:4px;padding:4px 8px}
+.more-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:48px 0 18px;padding-top:24px;border-top:1px solid var(--line)}
+.more-head h2{margin:0 0 4px;font-weight:400;font-size:24px}
+.more-head h2 span{font-size:14px;color:var(--muted);border:1px solid var(--line-strong);border-radius:999px;padding:1px 10px;vertical-align:middle}
+.more-head p{margin:0;color:var(--muted);font-size:14px;max-width:640px}
+.go-link{margin-top:auto;font-size:13px;color:var(--text);text-decoration:none;border-top:1px solid var(--line);padding-top:12px}
+.go-link:hover{text-decoration:underline}
+.tag{font-size:12px;border:1px solid var(--line-strong);border-radius:999px;padding:1px 10px;color:var(--muted);margin-inline-start:10px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo"><b>מוצא</b> האופניים</div>
+  </header>
+  <nav class="tabs" aria-label="שלבים">
+    <button class="tab on" data-go="1"><span>01</span>סגנון רכיבה</button>
+    <button class="tab" data-go="2" disabled><span>02</span>מידות גוף</button>
+    <button class="tab" data-go="3" disabled><span>03</span>העדפות</button>
+    <button class="tab" data-go="4" disabled><span>04</span>תוצאות</button>
+  </nav>
+  <div class="chips" id="chips"></div>
+
+  <section class="screen on" id="s1">
+    <h1>איך אתה רוכב?</h1>
+    <p class="lead">בחר סגנון רכיבה. לצד כל סגנון מופיעה כמות הדגמים שמצאנו בישראל.</p>
+    <div class="ring-stage">
+      <div>
+        <svg class="ring" viewBox="0 0 600 600" role="group" aria-label="סגנונות רכיבה" id="ring"></svg>
+        <div class="credit">צילומים: Unsplash</div>
+      </div>
+      <div class="side-list" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s1b">
+    <h1>איזה סוג אופני הרים?</h1>
+    <p class="lead">ההבדל העיקרי הוא בכמות הבולמים (המהלך) ובשטח שהם מיועדים לו. לא בטוח? בחר "לא משנה".</p>
+    <div class="strip" id="strip" role="group" aria-label="סוג אופני הרים"></div>
+    <div class="actions"><button class="btn ghost" data-go="1">חזרה לסגנונות</button></div>
+  </section>
+
+  <section class="screen" id="s2">
+    <h1>בוא נכיר אותך</h1>
+    <p class="lead">המידות עוזרות להתאים מידת שלדה. כל המידות בסנטימטרים.</p>
+    <div class="body-grid">
+      <div class="card avatar-card"><svg class="avatar" viewBox="0 0 345 590" id="avatar" aria-label="דמות עם קווי מדידה"></svg></div>
+      <div class="card form">
+        <div class="field">
+          <div class="t">מין <em>חובה</em></div>
+          <div class="seg-toggle" role="group" aria-label="מין">
+            <button type="button" data-g="m" aria-pressed="false">גבר</button>
+            <button type="button" data-g="f" aria-pressed="false">אישה</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="t" for="h">גובה <em>חובה</em></label>
+          <div class="num"><input id="h" inputmode="numeric" type="number" min="120" max="220" placeholder="178"><span>ס"מ</span></div>
+          <div class="help">גובה מלא, בלי נעליים.</div>
+          <div class="err" id="hErr"></div>
+        </div>
+        <div class="field">
+          <label class="t" for="leg">אורך רגל פנימי <em>מומלץ</em></label>
+          <div class="num"><input id="leg" inputmode="numeric" type="number" min="50" max="110" placeholder="84"><span>ס"מ</span></div>
+          <div class="help">עמוד יחף עם הגב לקיר, הצמד ספר בין הרגליים כלפי מעלה (כמו אוכף), ומדוד מהקצה העליון של הספר עד הרצפה. הקו הלבן על הדמות מראה מה מודדים.</div>
+          <div class="err" id="legErr"></div>
+        </div>
+        <div class="fitbox" id="fitbox" aria-live="polite"></div>
+        <div class="actions" style="margin-top:4px">
+          <button class="btn ghost" data-go="1">חזרה</button>
+          <button class="btn" id="toSearch" disabled>המשך לחיפוש</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s3">
+    <h1>מה חשוב לך?</h1>
+    <p class="lead">בחר לפי תקציב או לפי רמת אבזור, ואז העדפות של גלגלים ומשקל. אפשר לשנות הכל גם בעמוד התוצאות.</p>
+    <div class="modes" role="group" aria-label="סוג חיפוש">
+      <button class="mode" data-mode="budget" aria-pressed="true"><h3>לפי תקציב</h3><p>כמה אתה מוכן להשקיע</p></button>
+      <button class="mode" data-mode="tier" aria-pressed="false"><h3>לפי רמת אבזור</h3><p id="tierModeSub">בסיס, ביניים, גבוה או עילית</p></button>
+    </div>
+    <div class="panel on" id="pBudget">
+      <div class="label">טווח מחירים</div>
+      <div class="budget-chips" id="bChips"></div>
+      <div class="range-row">
+        <div class="num"><input id="bMin" type="number" inputmode="numeric" placeholder="מינימום"><span>₪</span></div>
+        <div class="num"><input id="bMax" type="number" inputmode="numeric" placeholder="מקסימום"><span>₪</span></div>
+      </div>
+    </div>
+    <div class="panel" id="pTier">
+      <div class="label">סוג הילוכים</div>
+      <div class="opt-row" id="shOpts" style="margin-bottom:24px"></div>
+      <div class="label">רמת אבזור</div>
+      <div class="tiers" id="tiers"></div>
+      <div class="label" style="margin-top:8px" id="tierTableTitle">מה כל רמה כוללת</div>
+      <div class="spec" id="tierTable"></div>
+    </div>
+
+    <div class="pref-grid">
+      <!-- MTB suspension type: shown for XC / "any" (trail and enduro are full suspension only) -->
+      <div class="pref" id="susPref" hidden>
+        <div class="label">סוג שיכוך</div>
+        <div class="opt-row" id="susOpts"></div>
+      </div>
+      <!-- carbon-wheels filter removed (2026-11-12): sellers rarely publish rim material, so it hid real matches -->
+      <div class="pref" hidden>
+        <div class="label">גלגלי קרבון</div>
+        <div class="opt-row" id="cwOpts"></div>
+      </div>
+      <div class="pref">
+        <div class="label">חומר השלדה</div>
+        <div class="opt-row" id="fmOpts"></div>
+      </div>
+    </div>
+    <p class="count" id="prefCount"></p>
+    <div class="actions">
+      <button class="btn ghost" data-go="2">חזרה</button>
+      <button class="btn" id="showRes">הצג תוצאות</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s4">
+    <div class="res-head">
+      <div>
+        <h1 id="resTitle">תוצאות</h1>
+        <p class="lead" id="resLead" style="margin-bottom:0"></p>
+      </div>
+      <button class="btn ghost" data-go="3">שינוי העדפות</button>
+    </div>
+    <details class="filters" id="filters" open>
+      <summary>סינון ומיון</summary>
+      <div class="fgrid">
+        <div class="fbox">
+          <div class="flabel">טווח מחיר <span id="rngVal"></span></div>
+          <div class="dual" id="dual">
+            <div class="track"><div class="fill" id="rngFill"></div></div>
+            <input type="range" id="rMin" aria-label="מחיר מינימום">
+            <input type="range" id="rMax" aria-label="מחיר מקסימום">
+          </div>
+        </div>
+        <div class="fbox">
+          <div class="flabel">מיון</div>
+          <div class="opt-row small" id="sortOpts"></div>
+        </div>
+        <div class="fbox" hidden>
+          <div class="flabel">גלגלי קרבון</div>
+          <div class="opt-row small" id="cwOpts2"></div>
+        </div>
+        <div class="fbox">
+          <div class="flabel">הילוכים</div>
+          <div class="opt-row small" id="shOpts2"></div>
+        </div>
+        <div class="fbox">
+          <div class="flabel">שלדה</div>
+          <div class="opt-row small" id="fmOpts2"></div>
+        </div>
+        <div class="fbox wide" id="discBox">
+          <div class="flabel">סוג אופני הרים</div>
+          <div class="opt-row small wrap" id="discOpts2"></div>
+        </div>
+        <div class="fbox" id="susBox">
+          <div class="flabel">שיכוך</div>
+          <div class="opt-row small" id="susOpts2"></div>
+        </div>
+        <div class="fbox wide" id="tierBox">
+          <div class="flabel">רמת אבזור</div>
+          <div class="opt-row small wrap" id="tierOpts2"></div>
+        </div>
+        <div class="fbox wide">
+          <div class="flabel">מותגים <button class="linkbtn" id="brandsAll">הצג הכל</button></div>
+          <div class="brand-chips" id="brandChips"></div>
+        </div>
+      </div>
+    </details>
+    <div class="unknown-note" id="unkNote"></div>
+    <div class="grid" id="grid"></div>
+    <div style="text-align:center;margin-top:24px"><button class="btn ghost" id="more">הצג עוד</button></div>
+    <div id="moreWrap"></div>
+  </section>
+</div>
+
+<div class="wrap"><footer class="credits">
+  צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json">logos/credits.json</a>).
+  הסימנים המסחריים שייכים לבעליהם ומוצגים לצורך זיהוי המותג בלבד.
+</footer></div>
+<script src="data.js"></script>
+<script>
+(function(){
+const BIKES = window.BIKES || [];
+const IMG = id => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=70`;
+const STYLES = [
+  // focus: point of interest in the photo (fraction of width/height) placed at the segment centre; w = drawn width, ar = photo aspect (h/w)
+  {k:"road",  he:"כביש",             sub:"מהירות על אספלט",      img:IMG("photo-1534787238916-9ba6764efd4f"), focus:{fx:.72, fy:.58, w:700, ar:506/900}},
+  {k:"tt",    he:'נג"ש / טריאתלון',  sub:"נגד השעון וטריאתלון",  img:IMG("photo-1782145695535-a1510cfc555d"), fx:.5, fy:.5},
+  {k:"gravel",he:"גראבל",            sub:"כביש ודרכי עפר",       img:IMG("photo-1643039686503-d3d6adb4e18a"), fx:.5, fy:.5},
+  {k:"mtb",   he:"הרים",             sub:"שבילים, XC ואנדורו",   img:IMG("photo-1760462568686-f16dfaf44678"), fx:.5, fy:.5},
+  {k:"emtb",  he:"הרים חשמליים",     sub:"שטח עם מנוע עזר",      img:IMG("photo-1792022839662-70f86f638ff5")},
+];
+const TIERS=[{n:1,he:"בסיס",en:"Entry"},{n:2,he:"ביניים",en:"Mid"},{n:3,he:"גבוה",en:"High"},{n:4,he:"עילית",en:"Elite"}];
+// agreed tier table (trim_levels.md) - definitions unchanged
+const TIER_ROWS=[
+  {k:"road",he:"כביש",cells:["Shimano Tiagra/105, אלומיניום","105 Di2, קרבון / SRAM Rival","Ultegra / SRAM Force","Dura-Ace / SRAM Red"]},
+  {k:"fs",he:"הרים – שיכוך מלא",cells:["Deore","SLX / SRAM NX","XT / SRAM GX","XTR / SRAM X0, XX"]},
+  {k:"ht",he:"הרים – זנב קשיח XC",cells:["Deore","SLX","XT / GX, קרבון","XTR / XX"]},
+  {k:"tt",he:'נג"ש / טריאתלון',cells:["105 / 105 Di2","Ultegra / SRAM Rival AXS","Ultegra Di2 / SRAM Force AXS","Dura-Ace Di2 / SRAM Red AXS"]},
+];
+const ROW_FOR={road:["road"],tt:["tt"],mtb:["fs","ht"],gravel:[],emtb:[]};
+const S={style:null,gender:null,h:null,leg:null,mode:"budget",bMin:null,bMax:null,tiers:new Set()};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const fmt=n=>n.toLocaleString("he-IL");
+const styleOf=k=>STYLES.find(s=>s.k===k);
+
+/* navigation */
+function go(n){
+  if(n>=2&&!S.style)return; if(n>=3&&!bodyValid())return;
+  $$("section.screen").forEach(s=>s.classList.toggle("on",s.id==="s"+n));
+  const tn=n==="1b"?1:n;
+  $$(".tab").forEach(b=>{const k=+b.dataset.go;b.classList.toggle("on",k===tn);b.disabled=(k===2&&!S.style)||(k>=3&&!bodyValid());});
+  if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4)renderResults(false);
+  chips(); window.scrollTo({top:0,behavior:"smooth"});
+}
+$$("[data-go]").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.go)));
+function chips(){
+  const c=[];
+  if(S.style)c.push(`<strong>${styleOf(S.style).he}</strong>`);
+  if(S.style==="mtb"&&S.disc&&S.disc!=="any")c.push(`<strong>${DISCS.find(d=>d.k===S.disc).short}</strong>`);
+  if(typeof susApplies==="function"&&susApplies()&&S.sus&&S.sus!=="any")c.push(`<strong>${SUS_HE[S.sus]}</strong>`);
+  if(S.gender)c.push(`<strong>${S.gender==="m"?"גבר":"אישה"}</strong>`);
+  if(S.h)c.push(`גובה <strong>${S.h}</strong> ס"מ`);
+  if(S.leg)c.push(`אורך רגל <strong>${S.leg}</strong> ס"מ`);
+  $("#chips").innerHTML=c.map(x=>`<span class="chip">${x}</span>`).join("");
+}
+
+/* 1: photo ring */
+function arc(cx,cy,r0,r1,a0,a1){
+  const p=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)], L=(a1-a0)>Math.PI?1:0;
+  const [x0,y0]=p(r1,a0),[x1,y1]=p(r1,a1),[x2,y2]=p(r0,a1),[x3,y3]=p(r0,a0);
+  return `M${x0},${y0} A${r1},${r1} 0 ${L} 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 ${L} 0 ${x3},${y3} Z`;
+}
+function drawRing(){
+  const n=STYLES.length,gap=.022,start=-Math.PI/2,R0=150,R1=290,C=300;
+  let defs="<defs>",body="";
+  STYLES.forEach((s,i)=>{
+    const a0=start+i*2*Math.PI/n+gap,a1=start+(i+1)*2*Math.PI/n-gap,am=(a0+a1)/2;
+    const d=arc(C,C,R0,R1,a0,a1), cnt=BIKES.filter(b=>b.s===s.k).length;
+    // image box covering the segment's bounding area, centred on the segment
+    const mx=C+(R0+R1)/2*Math.cos(am),my=C+(R0+R1)/2*Math.sin(am),w=300,h=300;
+    defs+=`<clipPath id="cp-${s.k}"><path d="${d}"/></clipPath>
+      <linearGradient id="sh-${s.k}" x1="${C}" y1="${C}" x2="${C+R1*Math.cos(am)}" y2="${C+R1*Math.sin(am)}" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#000" stop-opacity=".1"/><stop offset=".55" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></linearGradient>`;
+    const lr=R1-48,lx=C+lr*Math.cos(am),ly=C+lr*Math.sin(am);
+    body+=`<g class="seg" tabindex="0" role="button" aria-label="${s.he}, ${cnt} דגמים" data-k="${s.k}">
+      <g class="shape" clip-path="url(#cp-${s.k})">
+        <rect x="${mx-w/2}" y="${my-h/2}" width="${w}" height="${h}" fill="#2b2b2b"/>
+        ${s.focus
+          ? `<image href="${s.img}" x="${mx-s.focus.fx*s.focus.w}" y="${my-s.focus.fy*s.focus.w*s.focus.ar}" width="${s.focus.w}" height="${s.focus.w*s.focus.ar}" preserveAspectRatio="none"/>`
+          : `<image href="${s.img}" x="${mx-w/2}" y="${my-h/2}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>`}
+        <path class="shade" d="${d}" fill="url(#sh-${s.k})"/>
+        <path class="edge" d="${d}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1"/>
+      </g>
+      <text class="lbl" x="${lx}" y="${ly-3}">${s.he}</text>
+      <text class="cnt" x="${lx}" y="${ly+17}">${cnt} דגמים</text></g>`;
+  });
+  defs+="</defs>";
+  $("#ring").innerHTML=defs+body+`<circle cx="${C}" cy="${C}" r="${R0-14}" fill="none" stroke="rgba(255,255,255,.1)"/>`;
+  $$(".seg").forEach(g=>{const pick=()=>pickStyle(g.dataset.k);g.addEventListener("click",pick);
+    g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}});});
+  $("#legend").innerHTML=STYLES.map(s=>`<button data-k="${s.k}"><span><span class="nm">${s.he}</span><small>${s.sub} · ${BIKES.filter(b=>b.s===s.k).length} דגמים</small></span><span class="go">‹</span></button>`).join("");
+  $$("#legend button").forEach(b=>b.addEventListener("click",()=>pickStyle(b.dataset.k)));
+}
+/* 1b: MTB sub-type (XC / trail / enduro / don't mind) */
+const DISCS=[
+  {k:"xc",he:"קרוס קאנטרי · XC",short:"XC",tr:'מהלך 100–120 מ"מ',p:"קלים ומהירים, לטיפוסים ולמרוצים במסלולים זורמים.",img:IMG("photo-1708524709235-e054675c6be8")},
+  {k:"trail",he:"טרייל",short:"טרייל",tr:'מהלך 120–150 מ"מ',p:"הכל-יכולים: מטפסים בנוחות ויורדים בביטחון. מתאים לרוב הרוכבים.",img:IMG("photo-1792022839730-0c7430113bb2")},
+  {k:"enduro",he:"אנדורו",short:"אנדורו",tr:'מהלך 150–180 מ"מ',p:"לירידות טכניות ותלולות, קפיצות ושטח קשה.",img:IMG("photo-1603613991118-95642daecd36")},
+  {k:"any",he:"לא משנה",short:"הכל",tr:"כל סוגי אופני ההרים",p:"לא בטוח מה מתאים לך? נציג הכל, ותוכל לסנן גם אחר כך."}];
+/* MTB suspension type: hardtail / full suspension / don't mind */
+const SUS_OPTS=[["ht","זנב קשיח","בולם קדמי בלבד · קל ופשוט"],["fs","שיכוך מלא","בולם קדמי ואחורי · נוחות ואחיזה"],["any","לא משנה","כל סוג"]];
+const SUS_HE={ht:"זנב קשיח",fs:"שיכוך מלא"};
+const susApplies=()=>(S.style==="mtb"||S.style==="emtb")&&!(S.style==="mtb"&&(S.disc==="trail"||S.disc==="enduro"));
+function renderSus(elSel,compact){
+  const el=$(elSel); if(!el) return;
+  el.innerHTML=SUS_OPTS.map(([k,he,sub])=>`<button class="opt ${compact?"":"tall"}${bg("sus",k,compact)}" data-sus="${k}" aria-pressed="${S.sus===k}"><span>${he}${compact?"":`<small>${sub}</small>`}</span></button>`).join("");
+  $$(elSel+" button").forEach(b=>b.addEventListener("click",()=>{S.sus=b.dataset.sus;S.shown=24;refreshAll();}));
+}
+function pickStyle(k){
+  S.style=k; S.disc="any"; S.sus="any";
+  if(k==="mtb"){renderStrip(); go("1b");} else go(2);
+}
+function renderStrip(){
+  const all=BIKES.filter(b=>b.s==="mtb");
+  $("#strip").innerHTML=DISCS.map(d=>{const n=d.k==="any"?all.length:all.filter(b=>b.d===d.k).length;
+    return `<button class="disc ${d.k==="any"?"any":""}" data-d="${d.k}" ${d.img?`style="background-image:url('${d.img}')"`:""}>
+      <span class="in"><h3>${d.he}</h3><span class="tr">${d.tr}</span><p>${d.p}</p><span class="n">${n} דגמים</span></span></button>`;}).join("");
+  $$("#strip .disc").forEach(b=>b.addEventListener("click",()=>{S.disc=b.dataset.d; go(2);}));
+}
+const rowsFor=()=>S.style==="mtb"?(S.disc==="xc"?["ht","fs"]:(S.disc==="trail"||S.disc==="enduro")?["fs"]:["fs","ht"]):ROW_FOR[S.style];
+
+/* 2: avatar - drawn for 180 cm, scaled to the entered height */
+const FLOOR=568, PX=2.4; let focusField=null;
+function figure(g){
+  const f=g==="f", cx=175;
+  // key heights for a 180 cm figure (floor at 568, 2.4 px/cm)
+  const Y=cm=>FLOOR-cm*PX;
+  const top=Y(180), chin=Y(156), sh=Y(148), chest=Y(132), waist=Y(f?110:108), hip=Y(f?96:94), crotch=Y(84), knee=Y(50), ank=Y(8);
+  const W=f?{sh:37,ch:33,wa:25,hp:37,th:18,kn:10,ca:12,an:6,ar:9,fo:7}:{sh:47,ch:41,wa:34,hp:34,th:18,kn:11,ca:13,an:7,ar:11,fo:8};
+  const skin="url(#gSkin)", kit="url(#gKit)", shorts="url(#gShorts)";
+  // legs (skin), drawn first
+  const leg=s=>{const o=cx+s*W.hp, i=cx+s*3;
+    return `M${o},${hip} C${o+s*4},${crotch+40} ${cx+s*(W.th+W.kn-2)},${knee-40} ${cx+s*(W.kn+9)},${knee}
+      C${cx+s*(W.ca+10)},${knee+40} ${cx+s*(W.an+9)},${ank-30} ${cx+s*(W.an+7)},${ank}
+      L${cx+s*5},${ank} C${cx+s*4},${ank-40} ${cx+s*6},${knee+30} ${cx+s*6},${knee}
+      C${cx+s*5},${knee-40} ${i},${crotch+20} ${i},${crotch} Z`;};
+  const arm=s=>{const x=cx+s*(W.sh-4), e=cx+s*(W.sh+(f?6:8)), w=W.ar;
+    return `M${x},${sh+4} C${x+s*w*1.6},${sh+10} ${e+s*w*.6},${chest+10} ${e+s*w*.4},${waist-6}
+      C${e+s*w*.2},${waist+20} ${e-s*2},${hip+10} ${e-s*3},${crotch-14}
+      L${e-s*(w+2)},${crotch-14} C${e-s*(w+2)},${hip} ${e-s*(w+3)},${waist+10} ${e-s*(w+1)},${waist-8}
+      C${e-s*(w+2)},${chest+16} ${x+s*2},${chest} ${x-s*6},${chest-4} Z`;};
+  const torso=`M${cx-W.sh},${sh+6} Q${cx},${sh-8} ${cx+W.sh},${sh+6}
+      C${cx+W.sh+2},${chest-6} ${cx+W.ch+2},${chest+8} ${cx+W.wa},${waist}
+      C${cx+W.wa-1},${waist+14} ${cx+W.hp+1},${hip-12} ${cx+W.hp},${hip}
+      L${cx+W.hp+1},${crotch} Q${cx},${crotch+6} ${cx-W.hp-1},${crotch} L${cx-W.hp},${hip}
+      C${cx-W.hp-1},${hip-12} ${cx-W.wa+1},${waist+14} ${cx-W.wa},${waist}
+      C${cx-W.ch-2},${chest+8} ${cx-W.sh-2},${chest-6} ${cx-W.sh},${sh+6} Z`;
+  const shortsP=`M${cx-W.wa-1},${waist+18} L${cx+W.wa+1},${waist+18} C${cx+W.hp},${hip-8} ${cx+W.hp+2},${hip} ${cx+W.hp+3},${hip+6}
+      C${cx+W.hp+3},${crotch+20} ${cx+W.th+W.kn+4},${crotch+50} ${cx+W.th+6},${crotch+58}
+      L${cx+5},${crotch+58} L${cx+3},${crotch+4} L${cx-3},${crotch+4} L${cx-5},${crotch+58} L${cx-W.th-6},${crotch+58}
+      C${cx-W.th-W.kn-4},${crotch+50} ${cx-W.hp-3},${crotch+20} ${cx-W.hp-3},${hip+6} C${cx-W.hp-2},${hip} ${cx-W.hp},${hip-8} ${cx-W.wa-1},${waist+18} Z`;
+  const sleeve=s=>{const x=cx+s*(W.sh-4), e=cx+s*(W.sh+(f?6:8)), w=W.ar;
+    return `M${x-s*6},${sh+2} C${x+s*w*1.8},${sh+6} ${e+s*w*.9},${chest-6} ${e+s*w*.6},${chest+22} L${e-s*(w+3)},${chest+26} C${e-s*(w+2)},${chest+10} ${x},${chest} ${x-s*8},${chest-2} Z`;};
+  const headY=(top+chin)/2, hr=f?23:25, hry=(chin-top)/2;
+  const hairBack=f?`<path fill="url(#gHair)" d="M${cx-hr-3},${headY-4} C${cx-hr-6},${top-8} ${cx+hr+6},${top-8} ${cx+hr+3},${headY-4}
+      C${cx+hr+8},${chin+18} ${cx+hr+12},${sh+24} ${cx+hr+4},${sh+40} C${cx+8},${sh+30} ${cx-8},${sh+30} ${cx-hr-4},${sh+40}
+      C${cx-hr-12},${sh+24} ${cx-hr-8},${chin+18} ${cx-hr-3},${headY-4} Z"/>`:"";
+  const hairFront=f?`<path fill="url(#gHair)" d="M${cx-hr-1},${headY} C${cx-hr-2},${top-4} ${cx+hr+2},${top-6} ${cx+hr+1},${headY-2}
+      C${cx+hr-4},${top+12} ${cx+4},${top+6} ${cx-6},${top+16} C${cx-12},${top+22} ${cx-hr+2},${top+26} ${cx-hr-1},${headY} Z"/>`
+    :`<path fill="url(#gHair)" d="M${cx-hr},${headY-2} C${cx-hr-2},${top-6} ${cx+hr+2},${top-6} ${cx+hr},${headY-2}
+      C${cx+hr-3},${top+12} ${cx+hr-10},${top+8} ${cx},${top+9} C${cx-hr+10},${top+8} ${cx-hr+3},${top+12} ${cx-hr},${headY-2} Z"/>`;
+  const face=`<g opacity=".85">
+      <path d="M${cx-13},${headY-4} q5,-3 9,0 M${cx+4},${headY-4} q5,-3 9,0" stroke="#3b2a20" stroke-width="${f?1.4:2}" fill="none" stroke-linecap="round"/>
+      <ellipse cx="${cx-8.5}" cy="${headY+2}" rx="2.2" ry="1.6" fill="#2a1d16"/><ellipse cx="${cx+8.5}" cy="${headY+2}" rx="2.2" ry="1.6" fill="#2a1d16"/>
+      <path d="M${cx-1},${headY+4} q-3,8 1,9" stroke="#b07a5c" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <path d="M${cx-6},${headY+19} q6,${f?4:3} 12,0" stroke="${f?"#a8443f":"#8a5a46"}" stroke-width="${f?2:1.6}" fill="none" stroke-linecap="round"/>
+      ${f?"":`<path d="M${cx-hr+5},${headY+10} C${cx-hr+8},${chin+4} ${cx+hr-8},${chin+4} ${cx+hr-5},${headY+10} C${cx+hr-10},${chin-2} ${cx-hr+10},${chin-2} ${cx-hr+5},${headY+10} Z" fill="#3b2a20" opacity=".22"/>`}
+    </g>`;
+  const shoes=[-1,1].map(s=>`<path fill="#111" d="M${cx+s*4},${ank-2} L${cx+s*(W.an+9)},${ank-2} C${cx+s*(W.an+14)},${ank+4} ${cx+s*(W.an+16)},${FLOOR-4} ${cx+s*(W.an+15)},${FLOOR} L${cx+s*3},${FLOOR} Z"/>
+      <path fill="#fff" opacity=".85" d="M${cx+s*5},${ank-14} L${cx+s*(W.an+8)},${ank-14} L${cx+s*(W.an+8)},${ank-2} L${cx+s*4},${ank-2} Z"/>`).join("");
+  return `
+    <defs>
+      <linearGradient id="gSkin" x1="0" x2="1"><stop offset="0" stop-color="#c98f6b"/><stop offset=".45" stop-color="#efc2a0"/><stop offset="1" stop-color="#c08562"/></linearGradient>
+      <linearGradient id="gKit" x1="0" x2="1"><stop offset="0" stop-color="#2c2c2c"/><stop offset=".5" stop-color="#4a4a4a"/><stop offset="1" stop-color="#232323"/></linearGradient>
+      <linearGradient id="gShorts" x1="0" x2="1"><stop offset="0" stop-color="#0c0c0c"/><stop offset=".5" stop-color="#262626"/><stop offset="1" stop-color="#0a0a0a"/></linearGradient>
+      <linearGradient id="gHair" x1="0" x2="1"><stop offset="0" stop-color="#2a1a12"/><stop offset=".5" stop-color="#4a3022"/><stop offset="1" stop-color="#22150f"/></linearGradient>
+      <radialGradient id="gShadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+    </defs>
+    <ellipse cx="${cx}" cy="${FLOOR+2}" rx="70" ry="9" fill="url(#gShadow)"/>
+    ${hairBack}
+    <path fill="${skin}" d="${leg(-1)}"/><path fill="${skin}" d="${leg(1)}"/>
+    ${shoes}
+    <path fill="${skin}" d="${arm(-1)}"/><path fill="${skin}" d="${arm(1)}"/>
+    <rect x="${cx-8}" y="${chin-6}" width="16" height="${sh-chin+10}" rx="6" fill="${skin}"/>
+    <path fill="${kit}" d="${torso}"/>
+    <path fill="${kit}" d="${sleeve(-1)}"/><path fill="${kit}" d="${sleeve(1)}"/>
+    <path fill="#fff" opacity=".9" d="M${cx-W.ch+4},${chest+14} L${cx+W.ch-4},${chest+14} L${cx+W.ch-5},${chest+19} L${cx-W.ch+5},${chest+19} Z"/>
+    <path fill="${shorts}" d="${shortsP}"/>
+    <ellipse cx="${cx}" cy="${headY}" rx="${hr}" ry="${hry}" fill="${skin}"/>
+    <ellipse cx="${cx-hr+1}" cy="${headY+3}" rx="3.5" ry="6" fill="#d9a27f"/><ellipse cx="${cx+hr-1}" cy="${headY+3}" rx="3.5" ry="6" fill="#d9a27f"/>
+    ${face}${hairFront}${helmet(cx, top, headY, chin, hr)}`;
+}
+/* road/MTB-style cycling helmet: shell with vents, brow edge and chin straps */
+function helmet(cx, top, headY, chin, hr){
+  const R=hr+7, brow=headY-5;
+  const shell=`M${cx-R},${brow+4} C${cx-R-2},${top-2} ${cx-R+8},${top-16} ${cx},${top-17}
+      C${cx+R-8},${top-16} ${cx+R+2},${top-2} ${cx+R},${brow+4}
+      C${cx+R-6},${brow+1} ${cx+12},${brow-3} ${cx},${brow-3} C${cx-12},${brow-3} ${cx-R+6},${brow+1} ${cx-R},${brow+4} Z`;
+  const vents=[-14,0,14].map(dx=>`<path d="M${cx+dx-4},${top-8} C${cx+dx-5},${top+2} ${cx+dx-4},${brow-10} ${cx+dx},${brow-8}
+      C${cx+dx+4},${brow-10} ${cx+dx+5},${top+2} ${cx+dx+4},${top-8} C${cx+dx+2},${top-11} ${cx+dx-2},${top-11} ${cx+dx-4},${top-8} Z" fill="#111" opacity=".85"/>`).join("");
+  return `<defs><linearGradient id="gHelm" x1="0" x2="1"><stop offset="0" stop-color="#bdbdbd"/><stop offset=".45" stop-color="#ffffff"/><stop offset="1" stop-color="#a9a9a9"/></linearGradient></defs>
+    <path d="M${cx-hr+2},${headY+2} L${cx-6},${chin+1} M${cx+hr-2},${headY+2} L${cx+6},${chin+1}" stroke="#1a1a1a" stroke-width="1.6" fill="none"/>
+    <path d="${shell}" fill="url(#gHelm)" stroke="rgba(0,0,0,.35)" stroke-width="1"/>
+    ${vents}
+    <path d="M${cx-R+3},${brow+2} C${cx-10},${brow-5} ${cx+10},${brow-5} ${cx+R-3},${brow+2}" stroke="#111" stroke-width="2.5" fill="none" opacity=".8"/>`;
+}
+function drawAvatar(){
+  const h=S.h&&S.h>=120&&S.h<=220?S.h:178, k=h/180, cx=175;
+  let ruler="";
+  for(let cm=0;cm<=220;cm+=10){const y=FLOOR-cm*PX,big=cm%50===0;
+    ruler+=`<line x1="${big?30:36}" x2="44" y1="${y}" y2="${y}"/>`+(big?`<text x="4" y="${y+3}">${cm}</text>`:"");}
+  ruler+=`<line x1="44" x2="44" y1="${FLOOR}" y2="${FLOOR-220*PX}"/>`;
+  const hy=FLOOR-h*PX, cy=FLOOR-84*PX*k;
+  const hOn=focusField==="h"||(!!S.h&&focusField!=="leg"), lOn=focusField==="leg"||(!!S.leg&&focusField!=="h");
+  const legLbl=S.leg?`${S.leg} ס"מ`:"?";
+  $("#avatar").innerHTML=`<g class="ruler">${ruler}</g>
+    <g class="fig" style="transform-origin:${cx}px ${FLOOR}px;transform:scale(${k})">${figure(S.gender||"m")}</g>
+    <line x1="48" x2="340" y1="${FLOOR}" y2="${FLOOR}" stroke="rgba(255,255,255,.25)"/>
+    <line class="meas ${hOn?"on":""}" x1="318" x2="318" y1="${FLOOR}" y2="${hy}"/>
+    <line class="meas ${hOn?"on":""}" x1="308" x2="328" y1="${hy}" y2="${hy}"/>
+    <text class="mlabel ${hOn?"on":""}" x="332" y="${(hy+FLOOR)/2}" text-anchor="middle" transform="rotate(-90 332 ${(hy+FLOOR)/2})">גובה${S.h?" "+S.h+' ס"מ':""}</text>
+    <line class="meas ${lOn?"on":""}" x1="${cx}" x2="${cx}" y1="${FLOOR}" y2="${cy}"/>
+    <circle class="dot" cx="${cx}" cy="${cy}" r="${lOn?4:0}"/>
+    <line class="meas ${lOn?"on":""}" x1="${cx}" x2="${cx+62*k+10}" y1="${cy}" y2="${cy}" style="stroke-width:1"/>
+    <text class="mlabel ${lOn?"on":""}" x="${cx+62*k+14}" y="${cy+5}">אורך רגל</text>
+    <text class="mlabel ${lOn?"on":""}" x="${cx+62*k+14}" y="${cy+21}">${legLbl}</text>`;
+}
+/* frame size: general industry height tables; with inseam, LeMond's formula (road: 0.665 x inseam cm;
+   MTB: 0.226 x inseam = frame inches). Every brand has its own chart, so this is an estimate. */
+const SIZE_ROAD=[[0,155,"XXS",47,49],[155,162,"XS",49,51],[162,170,"S",51,53],[170,177,"M",54,55],[177,184,"L",56,57],[184,191,"XL",58,59],[191,999,"XXL",60,62]];
+const SIZE_MTB=[[0,155,"XS",13,14],[155,165,"S",15,16],[165,176,"M",17,18],[176,186,"L",19,20],[186,196,"XL",21,22],[196,999,"XXL",23,24]];
+const isRoadish=s=>s==="road"||s==="tt"||s==="gravel";
+function recommend(){
+  if(!S.h||!S.style) return null;
+  const T=isRoadish(S.style)?SIZE_ROAD:SIZE_MTB, i=T.findIndex(r=>S.h>=r[0]&&S.h<r[1]), row=T[Math.max(0,i)];
+  const near=T.find((r,j)=>j!==i&&(Math.abs(S.h-r[0])<=2||Math.abs(S.h-r[1])<=2)&&(j===i-1||j===i+1));
+  let legRow=null, legVal=null;
+  if(S.leg){
+    if(isRoadish(S.style)){legVal=Math.round(S.leg*.665); legRow=T.find(r=>legVal<=r[4])||T[T.length-1];}
+    else{legVal=Math.round(S.leg*.226*10)/10; legRow=T.find(r=>legVal<=r[4]+.5)||T[T.length-1];}
+  }
+  const main=legRow||row, alt=legRow&&legRow!==row?row:(near||null);
+  const unit=isRoadish(S.style)?'ס"מ':'אינץ\'';
+  return {L:main[2], alt:alt?alt[2]:null, range:`${main[3]}–${main[4]} ${unit}`, legVal, unit, byLeg:!!legRow};
+}
+function renderFit(){
+  const r=recommend(); const el=$("#fitbox"); if(!el) return;
+  if(!r){el.innerHTML="";return;}
+  el.innerHTML=`<div class="fit-k">המידה המומלצת לך ל${styleOf(S.style).he}</div>
+    <div class="fit-v">${r.L}${r.alt?` <small>או ${r.alt}</small>`:""}</div>
+    <div class="help">${r.byLeg?`לפי אורך הרגל: שלדה של כ-${r.legVal} ${r.unit}`:`לפי הגובה: שלדה של ${r.range}`}${r.alt?". אתה על הגבול בין שתי מידות, כדאי לנסות את שתיהן.":"."}
+      זו הערכה כללית. לכל יצרן טבלת מידות משלו, ובכרטיס של כל דגם נראה אם המידה שלך קיימת בו.</div>`;
+}
+const SIZE_ORDER=["3XS","XXS","XS","S","SM","M","ML","L","XL","XXL"];
+function sizeFit(b){
+  const r=recommend(); if(!r) return "";
+  // size is advice only: never a filter and no stock claim; the rider checks availability with the seller
+  return `<div class="fit">המידה המתאימה לך: <b>${r.L}</b></div>`;
+}
+function bodyValid(){return !!S.gender&&!!S.h&&S.h>=120&&S.h<=220&&(!S.leg||(S.leg>=50&&S.leg<=110&&S.leg<S.h*.6));}
+function bodyUpdate(){$("#toSearch").disabled=!bodyValid();$$(".tab")[2].disabled=!bodyValid();$$(".tab")[3].disabled=!bodyValid();chips();drawAvatar();renderFit();}
+$$(".seg-toggle button").forEach(b=>b.addEventListener("click",()=>{S.gender=b.dataset.g;$$(".seg-toggle button").forEach(x=>x.setAttribute("aria-pressed",x===b));bodyUpdate();}));
+$("#h").addEventListener("input",e=>{const v=+e.target.value;S.h=v||null;$("#hErr").textContent=v&&(v<120||v>220)?'הזן גובה בין 120 ל-220 ס"מ':"";bodyUpdate();});
+$("#leg").addEventListener("input",e=>{const v=+e.target.value;S.leg=v||null;
+  $("#legErr").textContent=v&&(v<50||v>110)?'הזן אורך רגל בין 50 ל-110 ס"מ':(v&&S.h&&v>=S.h*.6?"אורך הרגל נראה גדול מדי ביחס לגובה":"");bodyUpdate();});
+["h","leg"].forEach(id=>{const el=$("#"+id);el.addEventListener("focus",()=>{focusField=id;drawAvatar();});el.addEventListener("blur",()=>{focusField=null;drawAvatar();});});
+$("#toSearch").addEventListener("click",()=>go(3));
+
+/* 3: preferences */
+const BUDGETS=[[0,5000,"עד 5,000"],[5000,10000,"5,000–10,000"],[10000,20000,"10,000–20,000"],[20000,35000,"20,000–35,000"],[35000,null,"35,000+"]];
+// weight classes per riding style (kg): [label, from (exclusive), to (inclusive)]
+const WEIGHTS={
+  road:[["קל מאוד","",0,7.5],["קל","",7.5,8.5],["בינוני","",8.5,10],["כבד","",10,99]],
+  tt:[["קל מאוד","",0,8.5],["קל","",8.5,9.5],["בינוני","",9.5,11],["כבד","",11,99]],
+  gravel:[["קל מאוד","",0,8.5],["קל","",8.5,9.5],["בינוני","",9.5,11],["כבד","",11,99]],
+  mtb:[["קל מאוד","",0,11.5],["קל","",11.5,13.5],["בינוני","",13.5,15.5],["כבד","",15.5,99]],
+  emtb:[["קל מאוד","",0,20],["קל","",20,23],["בינוני","",23,25],["כבד","",25,99]]};
+const wLabel=w=>w[3]>=99?`מעל ${w[2]} ק"ג`:w[2]===0?`עד ${w[3]} ק"ג`:`${w[2]}–${w[3]} ק"ג`;
+const MAT={carbon:"קרבון",aluminum:"אלומיניום",steel:"פלדה",titanium:"טיטניום"};
+Object.assign(S,{cw:"any",fm:"any",sh:"any",sus:"any",wcat:null,hidden:new Set(),sort:"price",inclUnk:false,shown:24,rMin:null,rMax:null});
+const inStyle=()=>BIKES.filter(b=>b.s===S.style);
+const hasTiers=()=>rowsFor().length>0;
+
+/* wheel icon: deep carbon rim / shallow alloy rim / either */
+function wheelIcon(kind){
+  const deep=kind==="yes", any=kind==="any";
+  return `<svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
+    <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="3"/>
+    ${any?`<path d="M24 5 A19 19 0 0 1 24 43" fill="none" stroke="currentColor" stroke-width="8" opacity=".9"/><circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/>`
+      :`<circle cx="24" cy="24" r="${deep?15:18}" fill="none" stroke="currentColor" stroke-width="${deep?9:2}" opacity="${deep?.9:1}"/>`}
+    ${deep?"":[0,30,60,90,120,150].map(a=>`<line x1="24" y1="24" x2="${24+16*Math.cos(a*Math.PI/180)}" y2="${24+16*Math.sin(a*Math.PI/180)}" stroke="currentColor" stroke-width="1"/><line x1="24" y1="24" x2="${24-16*Math.cos(a*Math.PI/180)}" y2="${24-16*Math.sin(a*Math.PI/180)}" stroke="currentColor" stroke-width="1"/>`).join("")}
+    <circle cx="24" cy="24" r="3" fill="currentColor"/></svg>`;
+}
+const CW_OPTS=[["yes","כן","גלגלי קרבון"],["no","לא","גלגלי אלומיניום"],["any","לא משנה","כל סוג"]];
+const FM_OPTS=[["carbon","קרבון"],["other","לא קרבון"],["any","לא משנה"]];
+function renderPrefControls(cwEl,wEl,compact){
+  const fmEl=cwEl.replace("cwOpts","fmOpts");
+  $(fmEl).innerHTML=FM_OPTS.map(([k,he])=>`<button class="opt ${compact?"":"tall"}${bg("fm",k,compact)}" data-fm="${k}" aria-pressed="${S.fm===k}"><span>${he}${compact?"":`<small>${k==="carbon"?"קל וקשיח":k==="other"?"אלומיניום, פלדה":"כל סוג"}</small>`}</span></button>`).join("");
+  $$(fmEl+" button").forEach(b=>b.addEventListener("click",()=>{S.fm=b.dataset.fm;S.shown=24;refreshAll();}));
+  $(cwEl).innerHTML=CW_OPTS.map(([k,he,sub])=>`<button class="opt ${compact?"":"tall"}${bg("cw",k,compact)}" data-cw="${k}" aria-pressed="${S.cw===k}"><span>${he}${compact?"":`<small>${sub}</small>`}</span></button>`).join("");
+  $$(cwEl+" button").forEach(b=>b.addEventListener("click",()=>{S.cw=b.dataset.cw;S.shown=24;refreshAll();}));
+  // shifting type (electronic Di2/AXS vs mechanical), shown above the tier choice
+  $(wEl).innerHTML=SH_OPTS.map(([k,he,sub])=>`<button class="opt ${compact?"":"tall"}${bg("sh",k,compact)}" data-sh="${k}" aria-pressed="${S.sh===k}"><span>${he}${compact?"":`<small>${sub}</small>`}</span></button>`).join("");
+  $$(wEl+" button").forEach(b=>b.addEventListener("click",()=>{S.sh=b.dataset.sh;S.shown=24;refreshAll();}));
+}
+const SH_OPTS=[["el","חשמליים","Shimano Di2 / SRAM AXS"],["mech","מכניים","כבלים"],["any","לא משנה","כל סוג"]];
+// background photos (Unsplash licence) for the big preference buttons
+const OPT_IMG={sh:{el:IMG("photo-1769445886376-6dca3c4023ae"),mech:IMG("photo-1525104325683-eb7d21279760"),any:IMG("photo-1517263975512-e1e9172f466b")},
+  cw:{yes:IMG("photo-1779043750169-bbbe14e52f9d"),no:IMG("photo-1587458781281-02e116d1ebca"),any:IMG("photo-1785155155228-9e9144c962ee")},
+  fm:{carbon:IMG("photo-1622656507511-27f0a12f86b6"),other:IMG("photo-1779881040033-5b555ebd3928"),any:IMG("photo-1532298229144-0ec0c57515c7")}};
+// off-road (הרים / הרים חשמליים): wheel and frame photos from mountain bikes
+// suspension type: full suspension = rear shock close-up, hardtail = front fork only (Unsplash licence)
+OPT_IMG.sus={fs:IMG("photo-1699882861377-1aa44db9a456"),ht:IMG("photo-1769445860747-3ddb0f0a080b"),any:IMG("photo-1596738141905-51e94b519d69")};
+const OPT_IMG_MTB={sus:OPT_IMG.sus,cw:{yes:IMG("photo-1573475058214-d142fc8b6c6f"),no:IMG("photo-1647524147652-b7c337455ef6"),any:IMG("photo-1633379314351-bcc53a98e60b")},
+  fm:{carbon:IMG("photo-1639493616300-bcc86ac6e54b"),other:IMG("photo-1769445983253-22a9de120ef3"),any:IMG("photo-1697423878282-0c4bbc3f821a")}};
+const optImg=(grp,k)=>((S.style==="mtb"||S.style==="emtb")&&OPT_IMG_MTB[grp]?OPT_IMG_MTB:OPT_IMG)[grp][k];
+const bg=(grp,k,compact)=>compact?"":` photo" style="background-image:url('${optImg(grp,k)}')`;
+/* core filter: everything except the brand chips. incl=true also keeps models whose data for a chosen filter is
+   missing on the seller's site (they are never dropped: they go to the "more options" section at the end). */
+function filteredCore(incl){
+  let L=inStyle();
+  if(S.mode==="tier"&&hasTiers()){
+    // missing data = groupset not published; a known groupset outside the table (Altus, Cues...) is a real "not this tier"
+    L=L.filter(b=>(b.t!=null&&(S.tiers.size===0||S.tiers.has(b.t)))||(incl&&b.t==null&&!b.g));
+  }
+  const lo=S.mode==="budget"?S.bMin:S.rMin, hi=S.mode==="budget"?S.bMax:S.rMax;
+  // no published price but an approved estimate (b.pe = "from ₪X"): kept when the chosen range reaches X
+  if(lo!=null||hi!=null) L=L.filter(b=>b.p!=null?(lo==null||b.p>=lo)&&(hi==null||b.p<=hi):(b.pe!=null&&(hi==null||hi>b.pe)));
+  if(S.style==="mtb"&&S.disc&&S.disc!=="any") L=L.filter(b=>b.d===S.disc||(incl&&!b.d));
+  if(susApplies()&&S.sus&&S.sus!=="any") L=L.filter(b=>b.susp===S.sus||(incl&&!b.susp));
+  if(S.cw!=="any"){const want=S.cw==="yes"?1:0; L=L.filter(b=>b.cw===want||(incl&&b.cw==null));}
+  if(S.sh!=="any"){const want=S.sh==="el"?1:0; L=L.filter(b=>b.es===want||(incl&&b.es==null));}
+  if(S.fm!=="any"){const known=b=>b.f&&b.f!=="UNKNOWN"; L=L.filter(b=>known(b)?(S.fm==="carbon")===(b.f==="carbon"):incl);}
+  return L;
+}
+function filtered(){
+  const L=filteredCore(false), ids=new Set(L);
+  const U=filteredCore(true).filter(b=>!ids.has(b));   // match on everything we know, but data is missing for a chosen filter
+  return {L,U,unk:U.length};
+}
+/* what is missing for this model, among the filters the user chose */
+function missingFor(b){
+  return [S.mode==="tier"&&hasTiers()&&b.t==null&&!b.g?"הילוכים":"",S.style==="mtb"&&S.disc&&S.disc!=="any"&&!b.d?"סוג רכיבה":"",
+    susApplies()&&S.sus!=="any"&&!b.susp?"סוג השיכוך":"",
+    S.cw!=="any"&&b.cw==null?"חומר הגלגלים":"",S.sh!=="any"&&b.es==null?"סוג ההילוכים":"",
+    S.fm!=="any"&&(!b.f||b.f==="UNKNOWN")?"חומר השלדה":""].filter(Boolean);
+}
+const missingWhat=()=>[S.mode==="tier"&&hasTiers()?"ההילוכים (המוכר לא פרסם מפרט)":"",S.style==="mtb"&&S.disc&&S.disc!=="any"?"סוג הרכיבה (XC / טרייל / אנדורו)":"",
+  susApplies()&&S.sus!=="any"?"סוג השיכוך":"",S.cw!=="any"?"חומר הגלגלים":"",S.sh!=="any"?"סוג ההילוכים":"",S.fm!=="any"?"חומר השלדה":""].filter(Boolean).join(" / ");
+function refreshSearch(){
+  const st=styleOf(S.style),rows=rowsFor();
+  if(!hasTiers()&&S.mode==="tier")S.mode="budget";
+  $(".mode[data-mode='tier']").disabled=!hasTiers();
+  $("#tierModeSub").textContent=hasTiers()?"בסיס, ביניים, גבוה או עילית":`אין עדיין טבלת רמות ל${st.he}`;
+  $("#bChips").innerHTML=BUDGETS.map((b,i)=>`<button data-i="${i}" aria-pressed="${(S.bMin||0)===b[0]&&S.bMax===b[1]}">${b[2]} ₪</button>`).join("");
+  $$("#bChips button").forEach(x=>x.addEventListener("click",()=>{const b=BUDGETS[+x.dataset.i];S.bMin=b[0]||null;S.bMax=b[1];$("#bMin").value=S.bMin??"";$("#bMax").value=S.bMax??"";refreshAll();}));
+  const exRow=TIER_ROWS.find(r=>rows.includes(r.k));  // sample groupset from the chosen style's row
+  $("#tiers").innerHTML=TIERS.map(t=>`<button class="tier lv${t.n}" data-n="${t.n}" aria-pressed="${S.tiers.has(t.n)}">
+    <span class="meter" aria-hidden="true">${[1,2,3,4].map(i=>`<i class="${i<=t.n?"on":""}"></i>`).join("")}</span>
+    <div class="lvl">רמה ${t.n}</div><div class="nm">${t.he}</div><div class="en">${t.en}</div>
+    ${exRow?`<div class="ex">${exRow.cells[t.n-1]}</div>`:""}</button>`).join("");
+  $$("#tiers .tier").forEach(x=>x.addEventListener("click",()=>{const n=+x.dataset.n;S.tiers.has(n)?S.tiers.delete(n):S.tiers.add(n);refreshAll();}));
+  // only the rows of the chosen riding style (road never sees MTB groupsets and vice versa)
+  $("#tierTable").innerHTML=`<div class="spec-head"><div>סוג</div>${TIERS.map(t=>`<div>${t.n} · ${t.he}</div>`).join("")}</div>`+
+    TIER_ROWS.filter(r=>rows.includes(r.k)).map(r=>`<div class="spec-row"><div class="rk">${r.he}</div>${r.cells.map((c,i)=>`<div class="c ${S.tiers.has(i+1)?"sel":""}" data-t="${TIERS[i].n} · ${TIERS[i].he}">${c}</div>`).join("")}</div>`).join("");
+  $$(".mode").forEach(m=>m.setAttribute("aria-pressed",m.dataset.mode===S.mode));
+  $("#pBudget").classList.toggle("on",S.mode==="budget");$("#pTier").classList.toggle("on",S.mode==="tier");
+  renderPrefControls("#cwOpts","#shOpts",false);
+  $("#susPref").hidden=!susApplies(); renderSus("#susOpts",false);
+  const {L,unk}=filtered();
+  $("#prefCount").innerHTML=`<b>${fmt(L.length)}</b>דגמי ${st.he} מתאימים`+(unk?` · ועוד ${fmt(unk)} שחסר עליהם מידע יופיעו בסוף, תחת "עוד אפשרויות"`:"");
+  $("#showRes").textContent=`הצג ${fmt(L.length)} אופניים`;$("#showRes").disabled=!(L.length||unk);
+}
+$$(".mode").forEach(m=>m.addEventListener("click",()=>{S.mode=m.dataset.mode;refreshAll();}));
+$("#bMin").addEventListener("input",e=>{S.bMin=+e.target.value||null;refreshAll();});
+$("#bMax").addEventListener("input",e=>{S.bMax=+e.target.value||null;refreshAll();});
+$("#showRes").addEventListener("click",()=>{S.shown=24;S.rMin=S.mode==="budget"?S.bMin:null;S.rMax=S.mode==="budget"?S.bMax:null;go(4);});
+
+/* 4: results */
+const BRAND_DOMAIN={"Trek":"trekbikes.com","Giant":"giant-bicycles.com","Liv":"liv-cycling.com","Specialized":"specialized.com","Norco":"norco.com",
+  "Haro":"harobikes.com","Raleigh":"raleigh.co.uk","Kona":"konaworld.com","Merida":"merida-bikes.com","Rocky Mountain":"bikes.com","BMC":"bmc-switzerland.com",
+  "GT":"gtbicycles.com","Pinarello":"pinarello.com","Colnago":"colnago.com","LOOK":"lookcycle.com","Argon 18":"argon18.com","Santa Cruz":"santacruzbicycles.com",
+  "Orbea":"orbea.com","Factor":"factorbikes.com","Scott":"scott-sports.com","Cervélo":"cervelo.com","Canyon":"canyon.com","Berria":"berriabikes.com",
+  "Marin":"marinbikes.com","Polygon":"polygonbikes.com","Whyte":"whyte.bike","Bianchi":"bianchi.com","Pivot":"pivotcycles.com","Jamis":"jamisbikes.com",
+  "Moustache":"moustachebikes.com","Crussis":"crussis.cz","Van Rysel":"decathlon.com","Triban":"decathlon.com","Tern":"ternbicycles.com","Electra":"electrabikes.com",
+  "Mongoose":"mongoose.com","Schwinn":"schwinnbikes.com","Steppenwolf":"steppenwolf-bikes.com","Diamondback":"diamondback.com","Liv ":"liv-cycling.com"};
+// logo kit: Wikimedia Commons files with a public-domain licence (site/logos/credits.json); other brands get a monogram
+const LOGOS={"Trek":"trek","Giant":"giant","Liv":"liv","BMC":"bmc","GT":"gt","Pinarello":"pinarello","Colnago":"colnago","LOOK":"look",
+  "Santa Cruz":"santa-cruz","Orbea":"orbea","Scott":"scott","Cervélo":"cervelo","Polygon":"polygon","Bianchi":"bianchi","Wilier":"wilier","Merida":"merida"};
+function brandLogo(b,wide){
+  const f=LOGOS[b];
+  if(f&&wide) return `<span class="wlogo"><img src="logos/${f}.svg" alt="${b}" loading="lazy"></span>`;
+  const ini=(b||"?").replace(/[^A-Za-z0-9 ]/g,"").split(/\s+/).filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase()||"?";
+  return f?`<span class="blogo img"><img src="logos/${f}.svg" alt="" loading="lazy"></span>`:`<span class="blogo" data-ini="${ini}"></span>`;
+}
+const SORTS=[["price","מחיר: מהזול"],["price-d","מחיר: מהיקר"],["tier","רמת אבזור"],["weight","משקל: מהקל"]];
+function sorted(L){
+  // unknown price sorts after the priced models (an estimate is only a floor, not a price)
+  const by={price:(a,b)=>(a.p??1e9)-(b.p??1e9),"price-d":(a,b)=>(b.p??-1)-(a.p??-1),tier:(a,b)=>(b.t??0)-(a.t??0)||(a.p??1e9)-(b.p??1e9),weight:(a,b)=>(a.w??99)-(b.w??99)};
+  return L.slice().sort(by[S.sort]);
+}
+function card(b,missing){
+  const price=b.est?`≈ ₪${fmt(b.p)}`:b.p!=null?`${b.pf?"החל מ-":""}₪${fmt(b.p)}`:"מחיר לא ידוע";
+  const sub=b.usd?`$${fmt(+b.usd)} + $${fmt(+b.ship||0)} משלוח · לפני מע"מ ומכס`:(b.pf?"טווח מחירים לפי מידה/צבע":
+    b.p==null&&b.pe?`המוכר לא מפרסם מחיר · הערכה: מ-₪${fmt(b.pe)}`:"");
+  const rows=[
+    ["הילוכים",b.g||"—"],
+    ["החלפה",b.es===1?"חשמלית":b.es===0?"מכנית":"—"],
+    ["שלדה",MAT[b.f]||"—"],
+    (b.s==="mtb"||b.s==="emtb")?["שיכוך",SUS_HE[b.susp]||"—"]:["גלגלים",b.cw===1?"קרבון":b.cw===0?"אלומיניום":"—"]];
+  return `<article class="bcard">
+    <header>${LOGOS[b.b]?brandLogo(b.b,true):brandLogo(b.b)}<div>${LOGOS[b.b]?"":`<div class="bb">${b.b}</div>`}<div class="seller">${b.usd?"רכישה ישירה · גרמניה":b.src}</div></div>
+      ${b.t?`<span class="tbadge t${b.t}">רמה ${b.t} · ${TIERS[b.t-1].he}</span>`:""}</header>
+    <h3>${b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"")}</h3>
+    <div class="price-row"><div class="price">${price}</div>${b.w?`<div class="wt"><b>${b.w}</b> ק"ג</div>`:""}</div>${sub?`<div class="psub">${sub}</div>`:""}
+    <dl>${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
+    ${b.fs?`<div class="psub">שלדה בלבד</div>`:""}
+    ${b.fill?`<div class="psub">המפרט לפי ${b.fill} (אותו דגם; המוכר לא פרסם מפרט)</div>`:""}
+    ${b.gv?`<div class="psub">ההילוכים לא פורסמו באתר המוכר; לפי <a href="${b.gv}" target="_blank" rel="noopener">מקור חיצוני לאותו דגם ↗</a></div>`:""}
+    ${b.gs?`<div class="psub">ההילוכים לפי תיאור המוצר באתר המוכר</div>`:""}
+    ${b.fv?`<div class="psub">חומר השלדה לא פורסם באתר המוכר; אומת מול <a href="${b.fv.u}" target="_blank" rel="noopener" title="${b.fv.t.replace(/"/g,"&quot;")}">מקור חיצוני ↗</a></div>`:""}
+    ${sizeFit(b)}
+    ${missing&&missing.length?`<div class="miss">חסר באתר המוכר: ${missing.join(", ")}</div>`:""}
+    <a class="go-link" href="${b.u}" target="_blank" rel="noopener">לדף המוצר ↗</a>
+  </article>`;
+}
+function setupRange(){
+  const priced=inStyle().filter(b=>b.p!=null).map(b=>b.p), lo=Math.floor(Math.min(...priced)/500)*500, hi=Math.ceil(Math.max(...priced)/500)*500;
+  [$("#rMin"),$("#rMax")].forEach(r=>{r.min=lo;r.max=hi;r.step=500;});
+  $("#rMin").value=S.rMin??lo; $("#rMax").value=S.rMax??hi;
+  const upd=()=>{let a=+$("#rMin").value,b=+$("#rMax").value; if(a>b)[a,b]=[b,a];
+    S.rMin=a<=lo?null:a; S.rMax=b>=hi?null:b; if(S.mode==="budget"){S.bMin=S.rMin;S.bMax=S.rMax;}
+    $("#rngVal").textContent=`₪${fmt(a)} – ₪${fmt(b)}${b>=hi?"+":""}`;
+    $("#rngFill").style.insetInlineStart=((a-lo)/(hi-lo)*100)+"%"; $("#rngFill").style.insetInlineEnd=(100-(b-lo)/(hi-lo)*100)+"%"; };
+  $("#rMin").oninput=()=>{upd();S.shown=24;renderResults(true);}; $("#rMax").oninput=()=>{upd();S.shown=24;renderResults(true);};
+  upd();
+}
+function renderResults(keepRange){
+  if(!keepRange) setupRange();
+  const st=styleOf(S.style), {L,U}=filtered();
+  const counts={}; L.concat(U).forEach(b=>counts[b.b]=(counts[b.b]||0)+1);
+  const visible=sorted(L.filter(b=>!S.hidden.has(b.b)));
+  const extra=sorted(U.filter(b=>!S.hidden.has(b.b)));
+  $("#resTitle").textContent=`${fmt(visible.length)} אופני ${st.he}`;
+  $("#resLead").textContent=[S.h?`גובה ${S.h} ס"מ`:"",S.mode==="tier"&&S.tiers.size?`רמות ${[...S.tiers].sort().map(n=>TIERS[n-1].he).join(", ")}`:"",
+    S.cw!=="any"?`גלגלי קרבון: ${S.cw==="yes"?"כן":"לא"}`:"",S.sh!=="any"?`הילוכים ${S.sh==="el"?"חשמליים":"מכניים"}`:"",
+    S.fm!=="any"?`שלדה: ${S.fm==="carbon"?"קרבון":"לא קרבון"}`:"",susApplies()&&S.sus!=="any"?SUS_HE[S.sus]:"",recommend()?`המידה שלך: ${recommend().L}`:""].filter(Boolean).join(" · ");
+  $("#sortOpts").innerHTML=SORTS.map(([k,he])=>`<button class="opt" data-s="${k}" aria-pressed="${S.sort===k}"><span>${he}</span></button>`).join("");
+  $$("#sortOpts button").forEach(b=>b.addEventListener("click",()=>{S.sort=b.dataset.s;renderResults(true);}));
+  renderPrefControls("#cwOpts2","#shOpts2",true);
+  $("#tierBox").style.display=hasTiers()?"":"none";
+  $("#discBox").style.display=S.style==="mtb"?"":"none";
+  $("#susBox").style.display=susApplies()?"":"none"; renderSus("#susOpts2",true);
+  $("#discOpts2").innerHTML=DISCS.map(d=>`<button class="opt" data-d="${d.k}" aria-pressed="${(S.disc||"any")===d.k}"><span>${d.short}</span></button>`).join("");
+  $$("#discOpts2 button").forEach(b=>b.addEventListener("click",()=>{S.disc=b.dataset.d;S.shown=24;chips();renderResults(true);}));
+  $("#tierOpts2").innerHTML=`<button class="opt" data-t="" aria-pressed="${S.tiers.size===0}"><span>הכל</span></button>`+TIERS.map(t=>`<button class="opt" data-t="${t.n}" aria-pressed="${S.tiers.has(t.n)}"><span>${t.n} · ${t.he}</span></button>`).join("");
+  $$("#tierOpts2 button").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.t===""){S.tiers.clear();S.mode="budget";}else{S.mode="tier";const n=+b.dataset.t;S.tiers.has(n)?S.tiers.delete(n):S.tiers.add(n);}S.shown=24;renderResults(true);}));
+  $("#brandChips").innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([b,n])=>`<button class="bchip" data-b="${b}" aria-pressed="${!S.hidden.has(b)}">${brandLogo(b)}<span>${b}</span><em>${n}</em></button>`).join("");
+  $$("#brandChips .bchip").forEach(x=>x.addEventListener("click",()=>{const b=x.dataset.b;S.hidden.has(b)?S.hidden.delete(b):S.hidden.add(b);S.shown=24;renderResults(true);}));
+  $("#unkNote").innerHTML="";
+  $("#grid").innerHTML=visible.slice(0,S.shown).map(b=>card(b)).join("")||`<p class="lead">אין דגמים שעונים על כל הבחירות.${extra.length?" ייתכן שמתאימים לך דגמים מתוך \"עוד אפשרויות\" למטה.":" נסה להרחיב את טווח המחיר או להחזיר מותגים."}</p>`;
+  $("#more").style.display=visible.length>S.shown?"":"none";
+  $("#more").textContent=`הצג עוד (${fmt(visible.length-S.shown)} נוספים)`;
+  // models whose seller did not publish a detail you filtered on: always offered at the end, never dropped
+  $("#moreWrap").innerHTML=extra.length?`
+    <div class="more-head">
+      <div><h2>עוד אפשרויות <span>${fmt(extra.length)}</span></h2>
+      <p>דגמים שמתאימים לשאר הבחירות שלך, אבל המוכר לא פרסם עליהם חלק מהמידע (${missingWhat()}). כדאי לבדוק בדף המוצר.</p></div>
+      <button class="btn ghost" id="moreToggle" aria-expanded="${!!S.openU}">${S.openU?"הסתר":"הצג עוד אפשרויות"}</button>
+    </div>
+    ${S.openU?`<div class="grid">${extra.slice(0,S.shownU).map(b=>card(b,missingFor(b))).join("")}</div>
+      ${extra.length>S.shownU?`<div style="text-align:center;margin-top:24px"><button class="btn ghost" id="moreU">הצג עוד (${fmt(extra.length-S.shownU)})</button></div>`:""}`:""}`:"";
+  if($("#moreToggle"))$("#moreToggle").onclick=()=>{S.openU=!S.openU;S.shownU=24;renderResults(true);};
+  if($("#moreU"))$("#moreU").onclick=()=>{S.shownU+=24;renderResults(true);};
+}
+$("#more").addEventListener("click",()=>{S.shown+=24;renderResults(true);});
+$("#brandsAll").addEventListener("click",()=>{S.hidden.clear();renderResults(true);});
+function refreshAll(){ if($("#s4").classList.contains("on")) renderResults(true); else refreshSearch(); }
+if(matchMedia("(max-width:700px)").matches) $("#filters").removeAttribute("open");
+drawRing();chips();
+})();
+</script>
+</body>
+</html>
