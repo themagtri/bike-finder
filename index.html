@@ -25,7 +25,9 @@ a{color:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
 /* top bar */
 header.top{display:flex;align-items:center;justify-content:space-between;height:64px}
-.logo{font-weight:500;font-size:17px;letter-spacing:.2px}
+.logo{font-weight:500;font-size:17px;letter-spacing:.2px;background:none;border:0;color:inherit;font-family:inherit;padding:0;cursor:pointer}
+.top-restart{font:inherit;font-size:14px;color:var(--ink,#fff);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer}
+.top-restart:hover{border-color:#fff}
 .logo b{font-weight:600}
 .tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -270,7 +272,8 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="logo"><b>מוצא</b> האופניים</div>
+    <button class="logo restart" type="button" aria-label="מוצא האופניים - חזרה להתחלה"><b>מוצא</b> האופניים</button>
+    <button class="top-restart restart" type="button" hidden>חיפוש חדש ↺</button>
   </header>
   <nav class="tabs" aria-label="שלבים">
     <button class="tab on" data-go="1"><span>01</span>סגנון רכיבה</button>
@@ -482,6 +485,7 @@ const styleOf=k=>STYLES.find(s=>s.k===k);
 function go(n){
   if(n>=2&&!S.style)return; if(n>=3&&!bodyValid())return;
   $$("section.screen").forEach(s=>s.classList.toggle("on",s.id==="s"+n));
+  { const tr=$(".top-restart"); if(tr) tr.hidden=(n===1); }
   const tn=n==="1b"?1:n;
   $$(".tab").forEach(b=>{const k=+b.dataset.go;b.classList.toggle("on",k===tn);b.disabled=(k===2&&!S.style)||(k>=3&&!bodyValid());});
   if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4)renderResults(false);
