@@ -902,7 +902,7 @@ function refreshSearch(){
   renderPrefControls("#cwOpts","#shOpts",false);
   $("#susPref").hidden=!susApplies(); renderSus("#susOpts",false);
   const {L,unk}=filtered();
-  $("#prefCount").innerHTML=`<b>${fmt(L.length)}</b>דגמי ${st.he} מתאימים`+(unk?` · ועוד ${fmt(unk)} שחסר עליהם מידע יופיעו בסוף, תחת "עוד אפשרויות"`:"");
+  $("#prefCount").innerHTML=`<b>${fmt(L.length)}</b>דגמי ${st.he} מתאימים`;  // models with missing data are simply shown at the end of the results
   $("#showRes").textContent=`הצג ${fmt(L.length)} אופניים`;$("#showRes").disabled=!(L.length||unk);updateFab(false);
 }
 $$(".mode").forEach(m=>m.addEventListener("click",()=>{S.mode=m.dataset.mode;refreshAll();}));
@@ -997,13 +997,9 @@ function renderResults(keepRange){
   $("#more").textContent=`הצג עוד (${fmt(visible.length-S.shown)} נוספים)`;
   // models whose seller did not publish a detail you filtered on: always offered at the end, never dropped
   $("#moreWrap").innerHTML=extra.length?`
-    <div class="more-head">
-      <div><h2>עוד אפשרויות <span>${fmt(extra.length)}</span></h2>
-      <p>דגמים שמתאימים לשאר הבחירות שלך, אבל המוכר לא פרסם עליהם חלק מהמידע (${missingWhat()}). כדאי לבדוק בדף המוצר.</p></div>
-      <button class="btn ghost" id="moreToggle" aria-expanded="${!!S.openU}">${S.openU?"הסתר":"הצג עוד אפשרויות"}</button>
-    </div>
-    ${S.openU?`<div class="grid">${extra.slice(0,S.shownU).map(b=>card(b,missingFor(b))).join("")}</div>
-      ${extra.length>S.shownU?`<div style="text-align:center;margin-top:24px"><button class="btn ghost" id="moreU">הצג עוד (${fmt(extra.length-S.shownU)})</button></div>`:""}`:""}`:"";
+    <div class="more-head"><div><h2>עוד אפשרויות <span>${fmt(extra.length)}</span></h2></div></div>
+    <div class="grid">${extra.slice(0,S.shownU).map(b=>card(b,missingFor(b))).join("")}</div>
+    ${extra.length>S.shownU?`<div style="text-align:center;margin-top:24px"><button class="btn ghost" id="moreU">הצג עוד (${fmt(extra.length-S.shownU)})</button></div>`:""}`:"";
   if($("#moreToggle"))$("#moreToggle").onclick=()=>{S.openU=!S.openU;S.shownU=24;renderResults(true);};
   if($("#moreU"))$("#moreU").onclick=()=>{S.shownU+=24;renderResults(true);};
 }
