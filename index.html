@@ -29,12 +29,14 @@ header.top{display:flex;align-items:center;justify-content:space-between;height:
 .top-restart{font:inherit;font-size:14px;color:var(--ink,#fff);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer}
 .top-restart:hover{border-color:#fff}
 .logo b{font-weight:600}
-.tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow-x:auto;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-@media (max-width:560px){.tabs{gap:16px}.tabs .tab{white-space:nowrap}}
+.tabs{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow:hidden}
+.tabs .tab+.tab::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.6;margin-inline-end:14px;vertical-align:middle}
+@media (max-width:560px){.tabs{gap:6px;justify-content:space-between}.tabs .tab{font-size:13px}.tabs .tab+.tab::before{margin-inline-end:6px}}
 .tab{background:none;border:0;padding:14px 0;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap;font-size:15px}
 .tab.on{color:var(--text)}
 .tab.on::after{content:"";position:absolute;inset:auto 0 -1px 0;height:1px;background:var(--text)}
+.tab+.tab.on::after{inset-inline-start:18px}
+@media (max-width:560px){.tab+.tab.on::after{inset-inline-start:10px}}
 .tab:disabled{cursor:default;opacity:.45}
 .tab span{font-variant-numeric:tabular-nums;margin-inline-end:8px;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:-20px 0 28px}
@@ -66,6 +68,12 @@ section.screen.on{display:block}
 .seg text{fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:3px}
 .seg .lbl{font-size:21px;font-weight:500}
 .seg .cnt{font-size:13px;fill:#e6e6e6}
+.recs h2{font-size:18px;font-weight:500;margin:0 0 12px}
+.recs-list{display:grid;gap:12px}
+.rec{position:relative;height:120px;border-radius:12px;overflow:hidden;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:12px 14px;isolation:isolate}
+.rec::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.75))}
+.rec .soon{position:absolute;top:10px;inset-inline-start:12px;background:#fff;color:#141414;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
+.rec .rt{font-size:15px;color:#fff}
 .side-list{display:grid;border-top:1px solid var(--line)}
 .side-list button{display:flex;justify-content:space-between;align-items:center;background:none;border:0;border-bottom:1px solid var(--line);padding:16px 2px;cursor:pointer;text-align:right}
 .side-list button:hover{background:rgba(255,255,255,.03)}
@@ -99,6 +107,13 @@ section.screen.on{display:block}
 .num input::placeholder{color:#5a5a5a}
 .num span{color:var(--muted)}
 .help{color:var(--muted);font-size:13px;margin-top:8px}
+.t-side{display:flex;align-items:baseline;gap:10px}
+.howto{background:none;border:0;padding:0;color:var(--text);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:16px}
+.modal-box{position:relative;background:#1c1c1c;border:1px solid var(--line);border-radius:14px;max-width:440px;width:100%;padding:22px 20px 18px}
+.modal-box h3{margin:0 0 12px;font-size:18px;font-weight:500;padding-inline-end:32px}
+.modal-box ol{margin:0;padding-inline-start:20px;display:grid;gap:8px;font-size:15px;line-height:1.5}
+.modal-x{position:absolute;top:12px;inset-inline-end:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--text);font-size:14px;cursor:pointer}
 .err{color:#ff8a7a;font-size:13px;min-height:18px;margin-top:4px}
 
 /* ---- 3: search ---- */
@@ -277,10 +292,10 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
     <button class="top-restart restart" type="button" hidden>חיפוש חדש ↺</button>
   </header>
   <nav class="tabs" aria-label="שלבים">
-    <button class="tab on" data-go="1"><span>01</span>סגנון רכיבה</button>
-    <button class="tab" data-go="2" disabled><span>02</span>מידות גוף</button>
-    <button class="tab" data-go="3" disabled><span>03</span>העדפות</button>
-    <button class="tab" data-go="4" disabled><span>04</span>תוצאות</button>
+    <button class="tab on" data-go="1">סגנון רכיבה</button>
+    <button class="tab" data-go="2" disabled>מידות גוף</button>
+    <button class="tab" data-go="3" disabled>העדפות</button>
+    <button class="tab" data-go="4" disabled>תוצאות</button>
   </nav>
   <div class="chips" id="chips"></div>
 
@@ -292,7 +307,10 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
         <svg class="ring" viewBox="0 0 600 600" role="group" aria-label="סגנונות רכיבה" id="ring"></svg>
         <div class="credit">צילומים: Unsplash</div>
       </div>
-      <div class="side-list" id="legend"></div>
+      <aside class="recs" aria-labelledby="recsTitle">
+        <h2 id="recsTitle">המלצות המערכת</h2>
+        <div class="recs-list" id="recs"></div>
+      </aside>
     </div>
   </section>
 
@@ -323,9 +341,8 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
           <div class="err" id="hErr"></div>
         </div>
         <div class="field">
-          <label class="t" for="leg">אורך רגל פנימי <em>מומלץ</em></label>
+          <div class="t"><label for="leg">אורך רגל פנימי</label><span class="t-side"><button type="button" class="howto" id="legHow">איך מודדים?</button><em>מומלץ</em></span></div>
           <div class="num"><input id="leg" inputmode="numeric" type="number" min="50" max="110" placeholder="84"><span>ס"מ</span></div>
-          <div class="help">עמוד יחף עם הגב לקיר, הצמד ספר בין הרגליים כלפי מעלה (כמו אוכף), ומדוד מהקצה העליון של הספר עד הרצפה. הקו הלבן על הדמות מראה מה מודדים.</div>
           <div class="err" id="legErr"></div>
         </div>
         <div class="fitbox" id="fitbox" aria-live="polite"></div>
@@ -538,8 +555,8 @@ function drawRing(){
   $("#ring").innerHTML=defs+body+`<circle cx="${C}" cy="${C}" r="${R0-14}" fill="none" stroke="rgba(255,255,255,.1)"/>`;
   $$(".seg").forEach(g=>{const pick=()=>pickStyle(g.dataset.k);g.addEventListener("click",pick);
     g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}});});
-  $("#legend").innerHTML=STYLES.map(s=>`<button data-k="${s.k}"><span><span class="nm">${s.he}</span><small>${s.sub} · ${BIKES.filter(b=>b.s===s.k).length} דגמים</small></span><span class="go">‹</span></button>`).join("");
-  $$("#legend button").forEach(b=>b.addEventListener("click",()=>pickStyle(b.dataset.k)));
+  // recommendations corner: placeholder panels until real recommendations / deals exist (Unsplash photos)
+  $("#recs").innerHTML=REC_IMGS.map(id=>`<div class="rec" style="background-image:url('${IMG(id)}')"><span class="soon">בקרוב</span><span class="rt">מבצעים והמלצות</span></div>`).join("");
 }
 /* 1b: MTB sub-type (XC / trail / enduro / don't mind) */
 const DISCS=[
@@ -556,6 +573,7 @@ function renderSus(elSel,compact){
   el.innerHTML=SUS_OPTS.map(([k,he,sub])=>`<button class="opt ${compact?"":"tall"}${bg("sus",k,compact)}" data-sus="${k}" aria-pressed="${S.sus===k}"><span>${he}${compact?"":`<small>${sub}</small>`}</span></button>`).join("");
   $$(elSel+" button").forEach(b=>b.addEventListener("click",()=>{S.sus=b.dataset.sus;S.shown=24;refreshAll();}));
 }
+const REC_IMGS=["photo-1576435728678-68d0fbf94e91","photo-1596738141905-51e94b519d69","photo-1622656507511-27f0a12f86b6","photo-1534150034764-046bf225d3fa"];
 function pickStyle(k){
   S.style=k; S.disc="any"; S.sus="any";
   if(k==="mtb"){renderStrip(); go("1b");} else go(2);
@@ -937,6 +955,25 @@ function refreshAll(){ if($("#s4").classList.contains("on")) renderResults(true)
 if(matchMedia("(max-width:700px)").matches) $("#filters").removeAttribute("open");
 drawRing();chips();
 })();
+</script>
+<div class="modal" id="legModal" hidden role="dialog" aria-modal="true" aria-labelledby="legModalT">
+  <div class="modal-box">
+    <button type="button" class="modal-x" aria-label="סגירה">✕</button>
+    <h3 id="legModalT">איך מודדים אורך רגל פנימי?</h3>
+    <ol>
+      <li>עומדים יחפים, עם הגב לקיר והרגליים מעט פסוקות.</li>
+      <li>מצמידים ספר בין הרגליים, עם הצד הצר כלפי מעלה, ולוחצים קלות כלפי מעלה (כמו אוכף).</li>
+      <li>מודדים מהקצה העליון של הספר ועד הרצפה, בסנטימטרים.</li>
+    </ol>
+    <p class="help">הקו הלבן על הדמות מראה מה מודדים. המידה עוזרת לדייק את מידת השלדה.</p>
+  </div>
+</div>
+<script>
+(function(){const m=document.getElementById("legModal"),open=()=>{m.hidden=false;m.querySelector(".modal-x").focus();},close=()=>{m.hidden=true;document.getElementById("legHow").focus();};
+ document.getElementById("legHow").addEventListener("click",open);
+ m.querySelector(".modal-x").addEventListener("click",close);
+ m.addEventListener("click",e=>{if(e.target===m)close();});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!m.hidden)close();});})();
 </script>
 </body>
 </html>
