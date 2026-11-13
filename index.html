@@ -132,6 +132,12 @@ body{padding-bottom:96px}
 .modal-fig{border-radius:12px;margin:0 0 14px;padding:8px}
 .modal-fig .avatar{max-height:44vh;width:auto;max-width:100%}
 .modal-box{max-height:92vh;overflow:auto}
+.leave-what{margin:0 0 6px;font-size:16px}
+.leave-what small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.leave-actions{display:grid;gap:10px;margin-top:16px}
+.leave-actions .btn{display:block;text-align:center;text-decoration:none;width:100%;box-sizing:border-box}
+.deals-list{margin-top:8px}
+.deals-list .rec{height:150px}
 .modal-x{position:absolute;top:12px;inset-inline-end:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--text);font-size:14px;cursor:pointer}
 .err{color:#ff8a7a;font-size:13px;min-height:18px;margin-top:4px}
 
@@ -516,6 +522,13 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
       <button class="btn restart">חזרה להתחלה · חיפוש חדש ↺</button>
     </div>
   </section>
+
+  <section class="screen" id="sdeals">
+    <h1 id="dealsTitle">מבצעים והמלצות</h1>
+    <p class="lead" id="dealsLead"></p>
+    <div class="recs-list deals-list" id="dealsList"></div>
+    <div class="actions end-actions"><button class="btn" id="dealsBack">חזרה לתוצאות</button></div>
+  </section>
 </div>
 
 <div class="wrap"><footer class="credits">
@@ -639,7 +652,7 @@ function selectDisc(d){
 let CUR=1;
 function updateFab(pulse){
   const f=$("#fab"); if(!f) return;
-  f.hidden=(CUR===4);
+  f.hidden=(CUR===4||CUR==="deals");
   const ok=CUR===1?!!S.pick:CUR==="1b"?!!S.discPick:CUR===2?bodyValid():CUR===3?!$("#showRes").disabled:false;
   const was=f.disabled; f.disabled=!ok;
   if(ok&&(was||pulse)){f.classList.remove("ready");void f.offsetWidth;f.classList.add("ready");}
@@ -834,8 +847,38 @@ function startOver(){
 }
 document.addEventListener("click",e=>{if(e.target.closest(".restart")) startOver();});
 // the whole result card opens the product page (inner links, e.g. the external-source link, keep their own target)
-document.addEventListener("click",e=>{const c=e.target.closest(".bcard"); if(!c||e.target.closest("a,button")) return;
-  const a=c.querySelector("a.go-link"); if(a) window.open(a.href,"_blank","noopener");});
+/* a card (or its "to product page" link) asks first: continue to the seller's page, or see the deals corner */
+document.addEventListener("click",e=>{const c=e.target.closest(".bcard"); if(!c) return;
+  const goLink=e.target.closest("a.go-link"); if(!goLink&&e.target.closest("a,button")) return;   // other inner links keep working
+  e.preventDefault(); openLeave(c);});
+function openLeave(c){
+  const a=c.querySelector("a.go-link"), m=document.getElementById("leaveModal"); if(!a||!m) return;
+  document.getElementById("leaveWhat").innerHTML=`${c.querySelector(".bb").textContent} ${c.querySelector(".bc-name").textContent}<small>${c.querySelector(".seller").textContent}</small>`;
+  document.getElementById("leaveGo").href=a.href;
+  m.hidden=false; document.getElementById("leaveGo").focus();
+}
+function closeLeave(){const m=document.getElementById("leaveModal"); if(m) m.hidden=true;}
+document.addEventListener("click",e=>{
+  const m=document.getElementById("leaveModal"); if(!m||m.hidden) return;
+  if(e.target.closest("#leaveGo")) closeLeave();                 // the link itself opens the new tab
+  else if(e.target.closest("#leaveDeals")){closeLeave(); showDeals();}
+  else if(e.target.closest("#leaveModal .modal-x")||e.target===m) closeLeave();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape") closeLeave();});
+/* deals & recommendations corner (placeholder until real deals exist), matched to the search's riding style */
+const DEAL_IMGS={road:["photo-1576435728678-68d0fbf94e91","photo-1622656507511-27f0a12f86b6","photo-1487803836022-91054ca05fdd","photo-1534787238916-9ba6764efd4f"],
+  tt:["photo-1782145695535-a1510cfc555d","photo-1622656507511-27f0a12f86b6","photo-1576435728678-68d0fbf94e91","photo-1487803836022-91054ca05fdd"],
+  gravel:["photo-1643039686503-d3d6adb4e18a","photo-1576435728678-68d0fbf94e91","photo-1785155155228-9e9144c962ee","photo-1487803836022-91054ca05fdd"],
+  mtb:["photo-1596738141905-51e94b519d69","photo-1534150034764-046bf225d3fa","photo-1697423878282-0c4bbc3f821a","photo-1760462568686-f16dfaf44678"],
+  emtb:["photo-1792022839662-70f86f638ff5","photo-1596738141905-51e94b519d69","photo-1697423878282-0c4bbc3f821a","photo-1534150034764-046bf225d3fa"]};
+function showDeals(){
+  const st=styleOf(S.style), he=st?st.he:"";
+  document.getElementById("dealsTitle").textContent=he?`מבצעים והמלצות · ${he}`:"מבצעים והמלצות";
+  document.getElementById("dealsLead").textContent=he?`בקרוב: מבצעים ודגמים מומלצים של אופני ${he}, שנבחרו לפי החיפוש שלך.`:"בקרוב: מבצעים ודגמים מומלצים, שנבחרו לפי החיפוש שלך.";
+  document.getElementById("dealsList").innerHTML=(DEAL_IMGS[S.style]||REC_IMGS).map(id=>`<div class="rec" style="background-image:url('${IMG(id)}')"><span class="soon">בקרוב</span><span class="rt">${he?`מבצעים · ${he}`:"מבצעים והמלצות"}</span></div>`).join("");
+  go("deals");
+}
+document.addEventListener("click",e=>{if(e.target.closest("#dealsBack")) go(4);});
 document.addEventListener("click",e=>{if(e.target.closest("#fab")) fabNext();});
 const hasTiers=()=>rowsFor().length>0;
 
@@ -1043,6 +1086,18 @@ if(matchMedia("(max-width:700px)").matches) $("#filters").removeAttribute("open"
 drawRing();chips();
 })();
 </script>
+<div class="modal" id="leaveModal" hidden role="dialog" aria-modal="true" aria-labelledby="leaveT">
+  <div class="modal-box">
+    <button type="button" class="modal-x" aria-label="סגירה">✕</button>
+    <h3 id="leaveT">אתה עומד לעבור לאתר המוכר</h3>
+    <p class="leave-what" id="leaveWhat"></p>
+    <p class="help">דף המוצר ייפתח בלשונית חדשה. המחיר והמלאי הקובעים הם אלה שבאתר המוכר.</p>
+    <div class="leave-actions">
+      <a class="btn" id="leaveGo" href="#" target="_blank" rel="noopener">המשך לדף המוצר ↗</a>
+      <button type="button" class="btn ghost" id="leaveDeals">בדוק את פינת המבצעים והמומלצים</button>
+    </div>
+  </div>
+</div>
 <div class="modal" id="legModal" hidden role="dialog" aria-modal="true" aria-labelledby="legModalT">
   <div class="modal-box">
     <button type="button" class="modal-x" aria-label="סגירה">✕</button>
