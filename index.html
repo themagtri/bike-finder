@@ -65,6 +65,19 @@ section.screen.on{display:block}
 .seg:hover .shape,.seg:focus-visible .shape{transform:scale(1.035)}
 .seg:hover .shade,.seg:focus-visible .shade{opacity:.35}
 .seg:focus-visible .edge{stroke:#fff;stroke-width:2}
+/* tap = select (mobile has no hover): the chosen segment grows and stays in colour, the rest go grey */
+.ring.has-sel .seg:not(.sel) image{filter:grayscale(.85) brightness(.55)}
+.seg.sel .shape{transform:scale(1.06)}
+.seg.sel .shade{opacity:.25}
+.seg.sel .edge{stroke:#fff;stroke-width:3}
+.fab{position:fixed;bottom:22px;left:22px;z-index:40;width:68px;height:68px;border-radius:50%;border:0;background:#fff;color:#141414;font:inherit;font-size:15px;font-weight:600;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 24px rgba(0,0,0,.45);transition:transform .2s ease,opacity .2s ease,background .2s ease}
+.fab span{display:block;line-height:1.1;text-align:center}
+.fab small{display:block;font-size:16px;font-weight:400}
+.fab:not(:disabled):active{transform:scale(.94)}
+.fab:disabled{background:#3a3a3a;color:#8a8a8a;box-shadow:none;cursor:default}
+.fab.ready{animation:fabPulse 1.6s ease-out 1}
+@keyframes fabPulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}100%{box-shadow:0 0 0 18px rgba(255,255,255,0)}}
+body{padding-bottom:96px}
 .seg text{fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:3px}
 .seg .lbl{font-size:21px;font-weight:500}
 .seg .cnt{font-size:13px;fill:#e6e6e6}
@@ -190,6 +203,9 @@ section.screen.on{display:block}
 .strip:hover .disc{filter:grayscale(.6) brightness(.7)}
 .strip .disc:hover,.strip .disc:focus-visible{flex:1.7;filter:none}
 .disc:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+.strip.has-sel .disc:not(.sel){filter:grayscale(.6) brightness(.7)}
+.strip .disc.sel{flex:1.7;filter:none;outline:3px solid #fff;outline-offset:-3px}
+@media (max-width:760px){.strip .disc.sel{flex:1}}
 .disc .in{position:absolute;inset:auto 0 0 0;padding:20px;display:grid;gap:4px}
 .disc h3{margin:0;font-size:24px;font-weight:400}
 .disc .tr{font-size:13px;letter-spacing:.3px;color:#ddd}
@@ -503,11 +519,12 @@ const styleOf=k=>STYLES.find(s=>s.k===k);
 function go(n){
   if(n>=2&&!S.style)return; if(n>=3&&!bodyValid())return;
   $$("section.screen").forEach(s=>s.classList.toggle("on",s.id==="s"+n));
+  CUR=n;
   { const tr=$(".top-restart"); if(tr) tr.hidden=(n===1); }
   const tn=n==="1b"?1:n;
   $$(".tab").forEach(b=>{const k=+b.dataset.go;b.classList.toggle("on",k===tn);b.disabled=(k===2&&!S.style)||(k>=3&&!bodyValid());});
   if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4)renderResults(false);
-  chips(); window.scrollTo({top:0,behavior:"smooth"});
+  chips(); updateFab(false); window.scrollTo({top:0,behavior:"smooth"});
 }
 $$("[data-go]").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.go)));
 function chips(){
@@ -553,7 +570,7 @@ function drawRing(){
   });
   defs+="</defs>";
   $("#ring").innerHTML=defs+body+`<circle cx="${C}" cy="${C}" r="${R0-14}" fill="none" stroke="rgba(255,255,255,.1)"/>`;
-  $$(".seg").forEach(g=>{const pick=()=>pickStyle(g.dataset.k);g.addEventListener("click",pick);
+  $$(".seg").forEach(g=>{const pick=()=>selectStyle(g.dataset.k);g.addEventListener("click",pick);
     g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}});});
   // recommendations corner: placeholder panels until real recommendations / deals exist (Unsplash photos)
   $("#recs").innerHTML=REC_IMGS.map(id=>`<div class="rec" style="background-image:url('${IMG(id)}')"><span class="soon">בקרוב</span><span class="rt">מבצעים והמלצות</span></div>`).join("");
@@ -574,6 +591,31 @@ function renderSus(elSel,compact){
   $$(elSel+" button").forEach(b=>b.addEventListener("click",()=>{S.sus=b.dataset.sus;S.shown=24;refreshAll();}));
 }
 const REC_IMGS=["photo-1576435728678-68d0fbf94e91","photo-1596738141905-51e94b519d69","photo-1622656507511-27f0a12f86b6","photo-1534150034764-046bf225d3fa"];
+/* selection before moving on: S.pick (riding style) and S.discPick (MTB type) */
+function selectStyle(k){
+  S.pick=k;
+  $$(".seg").forEach(g=>g.classList.toggle("sel",g.dataset.k===k)); $("#ring").classList.add("has-sel");
+  updateFab(true);
+}
+function selectDisc(d){
+  S.discPick=d;
+  $$("#strip .disc").forEach(b=>b.classList.toggle("sel",b.dataset.d===d)); $("#strip").classList.add("has-sel");
+  updateFab(true);
+}
+let CUR=1;
+function updateFab(pulse){
+  const f=$("#fab"); if(!f) return;
+  f.hidden=(CUR===4);
+  const ok=CUR===1?!!S.pick:CUR==="1b"?!!S.discPick:CUR===2?bodyValid():CUR===3?!$("#showRes").disabled:false;
+  const was=f.disabled; f.disabled=!ok;
+  if(ok&&(was||pulse)){f.classList.remove("ready");void f.offsetWidth;f.classList.add("ready");}
+}
+function fabNext(){
+  if(CUR===1&&S.pick) pickStyle(S.pick);
+  else if(CUR==="1b"&&S.discPick){S.disc=S.discPick; go(2);}
+  else if(CUR===2&&bodyValid()) go(3);
+  else if(CUR===3&&!$("#showRes").disabled) $("#showRes").click();
+}
 function pickStyle(k){
   S.style=k; S.disc="any"; S.sus="any";
   if(k==="mtb"){renderStrip(); go("1b");} else go(2);
@@ -583,7 +625,8 @@ function renderStrip(){
   $("#strip").innerHTML=DISCS.map(d=>{const n=d.k==="any"?all.length:all.filter(b=>b.d===d.k).length;
     return `<button class="disc ${d.k==="any"?"any":""}" data-d="${d.k}" ${d.img?`style="background-image:url('${d.img}')"`:""}>
       <span class="in"><h3>${d.he}</h3><span class="tr">${d.tr}</span><p>${d.p}</p><span class="n">${n} דגמים</span></span></button>`;}).join("");
-  $$("#strip .disc").forEach(b=>b.addEventListener("click",()=>{S.disc=b.dataset.d; go(2);}));
+  S.discPick=null;
+  $$("#strip .disc").forEach(b=>b.addEventListener("click",()=>selectDisc(b.dataset.d)));
 }
 const rowsFor=()=>S.style==="mtb"?(S.disc==="xc"?["ht","fs"]:(S.disc==="trail"||S.disc==="enduro")?["fs"]:["fs","ht"]):ROW_FOR[S.style];
 
@@ -726,7 +769,7 @@ function sizeFit(b){
   return `<div class="fit">המידה המתאימה לך: <b>${r.L}</b><span class="fit-note">הערכה לפי מידות הגוף. יש לאמת בחנות או אצל מתאים אופניים (Bike Fit) מוסמך.</span></div>`;
 }
 function bodyValid(){return !!S.gender&&!!S.h&&S.h>=120&&S.h<=220&&(!S.leg||(S.leg>=50&&S.leg<=110&&S.leg<S.h*.6));}
-function bodyUpdate(){$("#toSearch").disabled=!bodyValid();$$(".tab")[2].disabled=!bodyValid();$$(".tab")[3].disabled=!bodyValid();chips();drawAvatar();renderFit();}
+function bodyUpdate(){$("#toSearch").disabled=!bodyValid();if(typeof updateFab==="function")updateFab(false);$$(".tab")[2].disabled=!bodyValid();$$(".tab")[3].disabled=!bodyValid();chips();drawAvatar();renderFit();}
 $$(".seg-toggle button").forEach(b=>b.addEventListener("click",()=>{S.gender=b.dataset.g;$$(".seg-toggle button").forEach(x=>x.setAttribute("aria-pressed",x===b));bodyUpdate();}));
 $("#h").addEventListener("input",e=>{const v=+e.target.value;S.h=v||null;$("#hErr").textContent=v&&(v<120||v>220)?'הזן גובה בין 120 ל-220 ס"מ':"";bodyUpdate();});
 $("#leg").addEventListener("input",e=>{const v=+e.target.value;S.leg=v||null;
@@ -749,12 +792,14 @@ Object.assign(S,{cw:"any",fm:"any",sh:"any",sus:"any",wcat:null,hidden:new Set()
 const inStyle=()=>BIKES.filter(b=>b.s===S.style);
 /* start a new search: back to the riding-style ring; body measurements are kept, all preferences reset */
 function startOver(){
+  S.pick=null; S.discPick=null; $$(".seg").forEach(g=>g.classList.remove("sel")); $("#ring").classList.remove("has-sel");
   Object.assign(S,{style:null,disc:"any",mode:"budget",bMin:null,bMax:null,tiers:new Set(),cw:"any",fm:"any",sh:"any",sus:"any",
     hidden:new Set(),sort:"price",shown:24,rMin:null,rMax:null,openU:false,shownU:24});
   ["#bMin","#bMax"].forEach(s=>{const e=$(s); if(e) e.value="";});
   go(1); window.scrollTo({top:0,behavior:"smooth"});
 }
 document.addEventListener("click",e=>{if(e.target.closest(".restart")) startOver();});
+document.addEventListener("click",e=>{if(e.target.closest("#fab")) fabNext();});
 const hasTiers=()=>rowsFor().length>0;
 
 /* wheel icon: deep carbon rim / shallow alloy rim / either */
@@ -845,7 +890,7 @@ function refreshSearch(){
   $("#susPref").hidden=!susApplies(); renderSus("#susOpts",false);
   const {L,unk}=filtered();
   $("#prefCount").innerHTML=`<b>${fmt(L.length)}</b>דגמי ${st.he} מתאימים`+(unk?` · ועוד ${fmt(unk)} שחסר עליהם מידע יופיעו בסוף, תחת "עוד אפשרויות"`:"");
-  $("#showRes").textContent=`הצג ${fmt(L.length)} אופניים`;$("#showRes").disabled=!(L.length||unk);
+  $("#showRes").textContent=`הצג ${fmt(L.length)} אופניים`;$("#showRes").disabled=!(L.length||unk);updateFab(false);
 }
 $$(".mode").forEach(m=>m.addEventListener("click",()=>{S.mode=m.dataset.mode;refreshAll();}));
 $("#bMin").addEventListener("input",e=>{S.bMin=+e.target.value||null;refreshAll();});
@@ -975,5 +1020,7 @@ drawRing();chips();
  m.addEventListener("click",e=>{if(e.target===m)close();});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!m.hidden)close();});})();
 </script>
+<button type="button" class="fab" id="fab" disabled aria-label="המשך לשלב הבא"><span>המשך<small>‹</small></span></button>
+<script>if(typeof updateFab==="function")updateFab(false);</script>
 </body>
 </html>
