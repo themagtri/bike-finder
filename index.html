@@ -343,7 +343,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
     <h1>איזה סוג אופני הרים?</h1>
     <p class="lead">ההבדל העיקרי הוא בכמות הבולמים (המהלך) ובשטח שהם מיועדים לו. לא בטוח? בחר "לא משנה".</p>
     <div class="strip" id="strip" role="group" aria-label="סוג אופני הרים"></div>
-    <div class="actions"><button class="btn ghost" data-go="1">חזרה לסגנונות</button></div>
+    <div class="actions" hidden><button class="btn ghost" data-go="1">חזרה לסגנונות</button></div>
   </section>
 
   <section class="screen" id="s2">
@@ -370,7 +370,8 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
           <div class="err" id="legErr"></div>
         </div>
         <div class="fitbox" id="fitbox" aria-live="polite"></div>
-        <div class="actions" style="margin-top:4px">
+        <!-- replaced by the floating continue button; kept hidden because the scripts read its state -->
+        <div class="actions" style="margin-top:4px" hidden>
           <button class="btn ghost" data-go="1">חזרה</button>
           <button class="btn" id="toSearch" disabled>המשך לחיפוש</button>
         </div>
@@ -419,7 +420,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
       </div>
     </div>
     <p class="count" id="prefCount"></p>
-    <div class="actions">
+    <div class="actions" hidden>
       <button class="btn ghost" data-go="2">חזרה</button>
       <button class="btn" id="showRes">הצג תוצאות</button>
     </div>
