@@ -77,7 +77,7 @@ section.screen.on{display:block}
 .fab small{display:block;font-size:16px;font-weight:400}
 .fab:not(:disabled):active{transform:scale(.94)}
 .fab:disabled{background:#3a3a3a;color:#8a8a8a;box-shadow:none;cursor:default}
-.fab.ready{animation:fabPulse 1.6s ease-out 1}
+.fab.ready{animation:fabPulse 1.8s ease-out infinite}
 @keyframes fabPulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}100%{box-shadow:0 0 0 18px rgba(255,255,255,0)}}
 body{padding-bottom:96px}
 .seg text{fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:3px}
@@ -300,6 +300,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 .bc-logo{width:92px;height:36px;display:flex;align-items:center}
 .bc-logo .wlogo{width:100%;min-width:0;height:36px;padding:0 8px;box-sizing:border-box}
 .bc-logo .wlogo img{max-width:100%;max-height:18px}
+.bc-logo .wtext{color:#141414;font-size:13px;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;justify-content:center;direction:ltr}
 .bc-logo .blogo{width:36px;height:36px}
 .bc-logo .blogo img{width:24px;height:24px}
 .bc-id{min-width:0}
@@ -309,6 +310,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 .bc-tier{height:22px;display:flex;align-items:center}
 .bc-price{height:58px;display:flex;flex-direction:column;justify-content:flex-start;gap:4px}
 .bc-price .psub.one{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-size{min-height:52px}
 .bc-notes{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0}
 .bc-notes .psub{margin:0}
 .tbadge{font-size:11px;border:1px solid var(--line-strong);border-radius:999px;padding:2px 9px;white-space:nowrap;color:var(--muted)}
@@ -655,7 +657,8 @@ function updateFab(pulse){
   f.hidden=(CUR===4||CUR==="deals");
   const ok=CUR===1?!!S.pick:CUR==="1b"?!!S.discPick:CUR===2?bodyValid():CUR===3?!$("#showRes").disabled:false;
   const was=f.disabled; f.disabled=!ok;
-  if(ok&&(was||pulse)){f.classList.remove("ready");void f.offsetWidth;f.classList.add("ready");}
+  if(!ok) f.classList.remove("ready");
+  else if(was||pulse||!f.classList.contains("ready")){f.classList.remove("ready");void f.offsetWidth;f.classList.add("ready");}
 }
 function fabNext(){
   if(CUR===1&&S.pick) pickStyle(S.pick);
@@ -1013,13 +1016,14 @@ function card(b,missing){
   const name=b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"");
   // fixed card rows (same position on every card): head · name · tier · price · specs · notes · link
   return `<article class="bcard">
-    <header class="bc-head"><span class="bc-logo">${LOGOS[b.b]?brandLogo(b.b,true):brandLogo(b.b)}</span>
+    <header class="bc-head"><span class="bc-logo">${LOGOS[b.b]?brandLogo(b.b,true):`<span class="wlogo wtext">${b.b}</span>`}</span>
       <div class="bc-id"><div class="bb" title="${b.b}">${b.b}</div><div class="seller" title="${seller}">${seller}</div></div></header>
     <h3 class="bc-name" title="${name.replace(/"/g,"&quot;")}">${name}</h3>
     <div class="bc-tier">${b.t?`<span class="tbadge t${b.t}">רמה ${b.t} · ${TIERS[b.t-1].he}</span>`:""}</div>
     <div class="bc-price"><div class="price-row"><div class="price">${price}</div>${b.w?`<div class="wt"><b>${b.w}</b> ק"ג</div>`:""}</div>
       <div class="psub one" title="${sub}">${sub||"&nbsp;"}</div></div>
     <dl>${rows.map(([k,v])=>`<div><dt>${k}</dt><dd title="${String(v).replace(/"/g,"&quot;")}">${v}</dd></div>`).join("")}</dl>
+    <div class="bc-size">${sizeFit(b)}</div>
     <div class="bc-notes">
       ${b.fs?`<div class="psub">שלדה בלבד</div>`:""}
       ${b.fill?`<div class="psub">המפרט לפי ${b.fill} (אותו דגם)</div>`:""}
@@ -1027,7 +1031,6 @@ function card(b,missing){
       ${b.gs?`<div class="psub">הילוכים: לפי תיאור המוצר אצל המוכר</div>`:""}
       ${b.fv?`<div class="psub">חומר שלדה: לפי <a href="${b.fv.u}" target="_blank" rel="noopener" title="${b.fv.t.replace(/"/g,"&quot;")}">מקור חיצוני ↗</a></div>`:""}
       ${missing&&missing.length?`<div class="miss">חסר באתר המוכר: ${missing.join(", ")}</div>`:""}
-      ${sizeFit(b)}
     </div>
     <a class="go-link" href="${b.u}" target="_blank" rel="noopener">לדף המוצר ↗</a>
   </article>`;
