@@ -265,11 +265,15 @@ body{padding-bottom:96px}
 .filter-btn{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--line-strong,#444);background:transparent;color:var(--text);display:grid;place-items:center;cursor:pointer}
 .filter-btn[aria-expanded="true"]{background:#fff;color:#141414;border-color:#fff}
 .filters summary::before{content:"⌄ ";}
-.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding:4px 0 22px}
-@media (max-width:1000px){.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:600px){.fgrid{grid-template-columns:1fr}}
-.fbox.wide{grid-column:1/-1}
-.flabel{font-size:13px;color:var(--muted);margin-bottom:10px;display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+/* filters: one tidy row per filter - name column + options, thin divider between rows */
+.fgrid{display:flex;flex-direction:column;padding:0 0 10px}
+.fbox{display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.fbox:last-child{border-bottom:0}
+.flabel{font-size:14px;color:var(--muted);margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.fbox .opt-row.small,.fbox .brand-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fbox .opt-row.small .opt{height:36px;padding:0 14px;font-size:13px;justify-content:center}
+.fbox .dual{max-width:520px;width:100%}
+@media (max-width:600px){.fbox{grid-template-columns:1fr;gap:10px;padding:12px 0}.flabel{flex-direction:row;align-items:baseline;justify-content:space-between;width:100%}}
 .flabel span{color:var(--text);font-variant-numeric:tabular-nums}
 .linkbtn{background:none;border:0;color:var(--text);text-decoration:underline;cursor:pointer;font-size:13px;padding:0}
 .dual{position:relative;height:36px;direction:ltr}
@@ -474,6 +478,10 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
       <summary>סינון ומיון</summary>
       <div class="fgrid">
         <div class="fbox">
+          <div class="flabel">מיון</div>
+          <div class="opt-row small" id="sortOpts"></div>
+        </div>
+        <div class="fbox">
           <div class="flabel">טווח מחיר <span id="rngVal"></span></div>
           <div class="dual" id="dual">
             <div class="track"><div class="fill" id="rngFill"></div></div>
@@ -481,13 +489,17 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
             <input type="range" id="rMax" aria-label="מחיר מקסימום">
           </div>
         </div>
-        <div class="fbox">
-          <div class="flabel">מיון</div>
-          <div class="opt-row small" id="sortOpts"></div>
+        <div class="fbox" id="discBox">
+          <div class="flabel">סוג אופני הרים</div>
+          <div class="opt-row small" id="discOpts2"></div>
         </div>
-        <div class="fbox" hidden>
-          <div class="flabel">גלגלי קרבון</div>
-          <div class="opt-row small" id="cwOpts2"></div>
+        <div class="fbox" id="susBox">
+          <div class="flabel">שיכוך</div>
+          <div class="opt-row small" id="susOpts2"></div>
+        </div>
+        <div class="fbox" id="tierBox">
+          <div class="flabel">רמת אבזור</div>
+          <div class="opt-row small" id="tierOpts2"></div>
         </div>
         <div class="fbox">
           <div class="flabel">הילוכים</div>
@@ -497,19 +509,11 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
           <div class="flabel">שלדה</div>
           <div class="opt-row small" id="fmOpts2"></div>
         </div>
-        <div class="fbox wide" id="discBox">
-          <div class="flabel">סוג אופני הרים</div>
-          <div class="opt-row small wrap" id="discOpts2"></div>
+        <div class="fbox" hidden>
+          <div class="flabel">גלגלי קרבון</div>
+          <div class="opt-row small" id="cwOpts2"></div>
         </div>
-        <div class="fbox" id="susBox">
-          <div class="flabel">שיכוך</div>
-          <div class="opt-row small" id="susOpts2"></div>
-        </div>
-        <div class="fbox wide" id="tierBox">
-          <div class="flabel">רמת אבזור</div>
-          <div class="opt-row small wrap" id="tierOpts2"></div>
-        </div>
-        <div class="fbox wide">
+        <div class="fbox">
           <div class="flabel">מותגים <button class="linkbtn" id="brandsAll">הצג הכל</button></div>
           <div class="brand-chips" id="brandChips"></div>
         </div>
