@@ -251,7 +251,13 @@ body{padding-bottom:96px}
 .res-actions{display:flex;gap:10px;flex-wrap:wrap}
 .end-actions{margin-top:40px;padding-top:28px;border-top:1px solid var(--line)}
 .filters{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:18px}
-.filters summary{cursor:pointer;padding:14px 0;color:var(--muted);font-size:14px;list-style:none}
+.filters summary{display:none}
+.filters[open]{padding-top:14px}
+.filters:not([open]){border:0;margin:0}
+.res-title-row{display:flex;align-items:center;gap:12px}
+.res-title-row h1{margin:0}
+.filter-btn{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--line-strong,#444);background:transparent;color:var(--text);display:grid;place-items:center;cursor:pointer}
+.filter-btn[aria-expanded="true"]{background:#fff;color:#141414;border-color:#fff}
 .filters summary::before{content:"⌄ ";}
 .fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding:4px 0 22px}
 @media (max-width:1000px){.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -433,10 +439,13 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
   <section class="screen" id="s4">
     <div class="res-head">
       <div>
-        <h1 id="resTitle">תוצאות</h1>
-        <p class="lead" id="resLead" style="margin-bottom:0"></p>
+        <div class="res-title-row">
+          <h1 id="resTitle">תוצאות</h1>
+          <button type="button" class="filter-btn" id="filterBtn" aria-controls="filters" aria-expanded="true" aria-label="סינון ומיון" title="סינון ומיון"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 5h18l-7 8.2V19l-4 2v-7.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+        </div>
+        <p class="lead" id="resLead" style="margin-bottom:0" hidden></p>
       </div>
-      <div class="res-actions">
+      <div class="res-actions" hidden>
         <button class="btn ghost" data-go="3">שינוי העדפות</button>
         <button class="btn ghost restart">חיפוש חדש ↺</button>
       </div>
@@ -1007,6 +1016,8 @@ $("#more").addEventListener("click",()=>{S.shown+=24;renderResults(true);});
 $("#brandsAll").addEventListener("click",()=>{S.hidden.clear();renderResults(true);});
 function refreshAll(){ if($("#s4").classList.contains("on")) renderResults(true); else refreshSearch(); }
 if(matchMedia("(max-width:700px)").matches) $("#filters").removeAttribute("open");
+{ const fb=$("#filterBtn"), fl=$("#filters"), sync=()=>fb.setAttribute("aria-expanded",fl.open);
+  fb.addEventListener("click",()=>{fl.open=!fl.open;sync();}); fl.addEventListener("toggle",sync); sync(); }
 drawRing();chips();
 })();
 </script>
