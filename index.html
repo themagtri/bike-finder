@@ -96,7 +96,7 @@ body{padding-bottom:96px}
 .credit{color:var(--muted);font-size:12px;margin-top:14px}
 
 /* ---- 2: avatar ---- */
-.body-grid{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:28px;align-items:start}
+.body-grid{display:grid;grid-template-columns:minmax(0,560px);gap:28px;align-items:start}
 @media (max-width:820px){.body-grid{grid-template-columns:1fr}}
 .avatar-card{background:radial-gradient(60% 45% at 50% 40%, #3a3a3a 0%, #1d1d1d 70%);display:grid;place-items:center;padding:16px}
 .avatar{width:100%;max-width:360px;height:auto;direction:ltr}
@@ -110,6 +110,7 @@ body{padding-bottom:96px}
 .avatar .dot{fill:#fff}
 .form{display:grid;gap:26px}
 .field .t{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;font-size:15px}
+.req{color:#ff6b6b;font-weight:500;margin-inline-start:3px}
 .field .t em{font-style:normal;color:var(--muted);font-size:13px}
 .seg-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .seg-toggle button{padding:16px;border-radius:var(--radius);border:1px solid var(--line-strong);background:transparent;cursor:pointer;font-size:16px}
@@ -126,6 +127,9 @@ body{padding-bottom:96px}
 .modal-box{position:relative;background:#1c1c1c;border:1px solid var(--line);border-radius:14px;max-width:440px;width:100%;padding:22px 20px 18px}
 .modal-box h3{margin:0 0 12px;font-size:18px;font-weight:500;padding-inline-end:32px}
 .modal-box ol{margin:0;padding-inline-start:20px;display:grid;gap:8px;font-size:15px;line-height:1.5}
+.modal-fig{border-radius:12px;margin:0 0 14px;padding:8px}
+.modal-fig .avatar{max-height:44vh;width:auto;max-width:100%}
+.modal-box{max-height:92vh;overflow:auto}
 .modal-x{position:absolute;top:12px;inset-inline-end:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--text);font-size:14px;cursor:pointer}
 .err{color:#ff8a7a;font-size:13px;min-height:18px;margin-top:4px}
 
@@ -341,23 +345,22 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
     <h1>בוא נכיר אותך</h1>
     <p class="lead">המידות עוזרות להתאים מידת שלדה. כל המידות בסנטימטרים.</p>
     <div class="body-grid">
-      <div class="card avatar-card"><svg class="avatar" viewBox="0 0 345 590" id="avatar" aria-label="דמות עם קווי מדידה"></svg></div>
       <div class="card form">
         <div class="field">
-          <div class="t">מין <em>חובה</em></div>
+          <div class="t"><span>מין<b class="req" aria-label="שדה חובה">*</b></span></div>
           <div class="seg-toggle" role="group" aria-label="מין">
             <button type="button" data-g="m" aria-pressed="false">גבר</button>
             <button type="button" data-g="f" aria-pressed="false">אישה</button>
           </div>
         </div>
         <div class="field">
-          <label class="t" for="h">גובה <em>חובה</em></label>
+          <label class="t" for="h"><span>גובה<b class="req" aria-label="שדה חובה">*</b></span></label>
           <div class="num"><input id="h" inputmode="numeric" type="number" min="120" max="220" placeholder="178"><span>ס"מ</span></div>
           <div class="help">גובה מלא, בלי נעליים.</div>
           <div class="err" id="hErr"></div>
         </div>
         <div class="field">
-          <div class="t"><label for="leg">אורך רגל פנימי</label><span class="t-side"><button type="button" class="howto" id="legHow">איך מודדים?</button><em>מומלץ</em></span></div>
+          <div class="t"><label for="leg">אורך רגל פנימי</label><span class="t-side"><button type="button" class="howto" id="legHow">איך מודדים?</button></span></div>
           <div class="num"><input id="leg" inputmode="numeric" type="number" min="50" max="110" placeholder="84"><span>ס"מ</span></div>
           <div class="err" id="legErr"></div>
         </div>
@@ -1005,16 +1008,17 @@ drawRing();chips();
   <div class="modal-box">
     <button type="button" class="modal-x" aria-label="סגירה">✕</button>
     <h3 id="legModalT">איך מודדים אורך רגל פנימי?</h3>
+    <div class="avatar-card modal-fig"><svg class="avatar" viewBox="0 0 345 590" id="avatar" aria-label="דמות עם קו המדידה של אורך הרגל"></svg></div>
     <ol>
       <li>עומדים יחפים, עם הגב לקיר והרגליים מעט פסוקות.</li>
       <li>מצמידים ספר בין הרגליים, עם הצד הצר כלפי מעלה, ולוחצים קלות כלפי מעלה (כמו אוכף).</li>
       <li>מודדים מהקצה העליון של הספר ועד הרצפה, בסנטימטרים.</li>
     </ol>
-    <p class="help">הקו הלבן על הדמות מראה מה מודדים. המידה עוזרת לדייק את מידת השלדה.</p>
+    <p class="help">הקו המסומן על הדמות מראה מה מודדים. המידה עוזרת לדייק את מידת השלדה.</p>
   </div>
 </div>
 <script>
-(function(){const m=document.getElementById("legModal"),open=()=>{m.hidden=false;m.querySelector(".modal-x").focus();},close=()=>{m.hidden=true;document.getElementById("legHow").focus();};
+(function(){const m=document.getElementById("legModal"),open=()=>{m.hidden=false;try{focusField="leg";}catch(e){}if(typeof drawAvatar==="function")drawAvatar();m.querySelector(".modal-x").focus();},close=()=>{m.hidden=true;document.getElementById("legHow").focus();};
  document.getElementById("legHow").addEventListener("click",open);
  m.querySelector(".modal-x").addEventListener("click",close);
  m.addEventListener("click",e=>{if(e.target===m)close();});
