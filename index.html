@@ -29,14 +29,13 @@ header.top{display:flex;align-items:center;justify-content:space-between;height:
 .top-restart{font:inherit;font-size:14px;color:var(--ink,#fff);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer}
 .top-restart:hover{border-color:#fff}
 .logo b{font-weight:600}
-.tabs{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow:hidden}
-.tabs .tab+.tab::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.6;margin-inline-end:14px;vertical-align:middle}
-@media (max-width:560px){.tabs{gap:6px;justify-content:space-between}.tabs .tab{font-size:13px}.tabs .tab+.tab::before{margin-inline-end:6px}}
+.tabs{display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow:hidden}
+.tsep{flex:none;width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.6}
+@media (max-width:560px){.tabs{gap:0;justify-content:space-between}.tabs .tab{font-size:13px}}
 .tab{background:none;border:0;padding:14px 0;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap;font-size:15px}
 .tab.on{color:var(--text)}
 .tab.on::after{content:"";position:absolute;inset:auto 0 -1px 0;height:1px;background:var(--text)}
-.tab+.tab.on::after{inset-inline-start:18px}
-@media (max-width:560px){.tab+.tab.on::after{inset-inline-start:10px}}
+
 .tab:disabled{cursor:default;opacity:.45}
 .tab span{font-variant-numeric:tabular-nums;margin-inline-end:8px;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:-20px 0 28px}
@@ -137,6 +136,9 @@ body{padding-bottom:96px}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
 @media (max-width:640px){.modes{grid-template-columns:1fr}}
 .mode{border:1px solid var(--line-strong);background:transparent;border-radius:var(--radius);padding:20px;text-align:right;cursor:pointer}
+.mode{position:relative;overflow:hidden;isolation:isolate}
+.mode h3,.mode p{position:relative;z-index:1}
+.mode-img{position:absolute;inset:0 auto 0 0;width:46%;z-index:0;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(to right,#000 35%,transparent);mask-image:linear-gradient(to right,#000 35%,transparent);opacity:.9;pointer-events:none}
 .mode[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
 .mode[aria-pressed="true"] p{color:#555}
 .mode h3{margin:0 0 4px;font-size:19px;font-weight:500}
@@ -313,8 +315,11 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
   </header>
   <nav class="tabs" aria-label="שלבים">
     <button class="tab on" data-go="1">סגנון רכיבה</button>
+    <span class="tsep" aria-hidden="true"></span>
     <button class="tab" data-go="2" disabled>מידות גוף</button>
+    <span class="tsep" aria-hidden="true"></span>
     <button class="tab" data-go="3" disabled>העדפות</button>
+    <span class="tsep" aria-hidden="true"></span>
     <button class="tab" data-go="4" disabled>תוצאות</button>
   </nav>
   <div class="chips" id="chips"></div>
@@ -377,8 +382,8 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
     <h1>מה חשוב לך?</h1>
     <p class="lead">בחר לפי תקציב או לפי רמת אבזור, ואז העדפות של גלגלים ומשקל. אפשר לשנות הכל גם בעמוד התוצאות.</p>
     <div class="modes" role="group" aria-label="סוג חיפוש">
-      <button class="mode" data-mode="budget" aria-pressed="true"><h3>לפי תקציב</h3><p>כמה אתה מוכן להשקיע</p></button>
-      <button class="mode" data-mode="tier" aria-pressed="false"><h3>לפי רמת אבזור</h3><p id="tierModeSub">בסיס, ביניים, גבוה או עילית</p></button>
+      <button class="mode" data-mode="budget" aria-pressed="true"><span class="mode-img" style="background-image:url('https://images.unsplash.com/photo-1650706860147-2571c6a7a83e?auto=format&fit=crop&w=600&q=70')"></span><h3>לפי תקציב</h3><p>כמה אתה מוכן להשקיע</p></button>
+      <button class="mode" data-mode="tier" aria-pressed="false"><span class="mode-img" style="background-image:url('https://images.unsplash.com/photo-1771744274067-4d1fcf73687d?auto=format&fit=crop&w=600&q=70')"></span><h3>לפי רמת אבזור</h3><p id="tierModeSub">בסיס, ביניים, גבוה או עילית</p></button>
     </div>
     <div class="panel on" id="pBudget">
       <div class="label">טווח מחירים</div>
