@@ -38,8 +38,11 @@ header.top{display:flex;align-items:center;justify-content:space-between;height:
 
 .tab:disabled{cursor:default;opacity:.45}
 .tab span{font-variant-numeric:tabular-nums;margin-inline-end:8px;color:var(--muted)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:-20px 0 28px}
-.chip{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+/* selection summary: always one line; scrolls sideways (no visible bar) if it does not fit */
+.chips{display:flex;flex-wrap:nowrap;gap:8px;margin:-20px 0 28px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;white-space:nowrap;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+@media (max-width:560px){.chips{gap:6px}.chip{font-size:12px;padding:3px 9px}}
 .chip strong{color:var(--text);font-weight:500}
 h1{font-weight:400;font-size:clamp(28px,4.2vw,44px);letter-spacing:-.4px;margin:0 0 8px}
 .lead{color:var(--muted);margin:0 0 32px;font-size:16px;max-width:620px}
@@ -543,7 +546,7 @@ function chips(){
   if(typeof susApplies==="function"&&susApplies()&&S.sus&&S.sus!=="any")c.push(`<strong>${SUS_HE[S.sus]}</strong>`);
   if(S.gender)c.push(`<strong>${S.gender==="m"?"גבר":"אישה"}</strong>`);
   if(S.h)c.push(`גובה <strong>${S.h}</strong> ס"מ`);
-  if(S.leg)c.push(`אורך רגל <strong>${S.leg}</strong> ס"מ`);
+  if(S.leg)c.push(`רגל <strong>${S.leg}</strong> ס"מ`);
   $("#chips").innerHTML=c.map(x=>`<span class="chip">${x}</span>`).join("");
 }
 
