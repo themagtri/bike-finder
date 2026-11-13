@@ -290,15 +290,25 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 .bcard{cursor:pointer}
 .bcard:active{transform:scale(.99)}
 .bcard:hover{border-color:var(--line-strong);transform:translateY(-2px)}
-.bcard header{display:flex;align-items:center;gap:10px}
-.bcard header .blogo{width:34px;height:34px}
-.bcard header .blogo img{width:24px;height:24px}
-.bcard .bb{font-size:15px;font-weight:600}
-.bcard .seller{font-size:12px;color:var(--muted)}
-.tbadge{margin-inline-start:auto;font-size:11px;border:1px solid var(--line-strong);border-radius:999px;padding:2px 9px;white-space:nowrap;color:var(--muted)}
+.bc-head{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;align-items:center;height:40px}
+.bc-logo{width:92px;height:36px;display:flex;align-items:center}
+.bc-logo .wlogo{width:100%;min-width:0;height:36px;padding:0 8px;box-sizing:border-box}
+.bc-logo .wlogo img{max-width:100%;max-height:18px}
+.bc-logo .blogo{width:36px;height:36px}
+.bc-logo .blogo img{width:24px;height:24px}
+.bc-id{min-width:0}
+.bcard .bb{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcard .seller{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-name{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.6em;overflow-wrap:anywhere}
+.bc-tier{height:22px;display:flex;align-items:center}
+.bc-price{height:58px;display:flex;flex-direction:column;justify-content:flex-start;gap:4px}
+.bc-price .psub.one{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-notes{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0}
+.bc-notes .psub{margin:0}
+.tbadge{font-size:11px;border:1px solid var(--line-strong);border-radius:999px;padding:2px 9px;white-space:nowrap;color:var(--muted)}
 .tbadge.t3,.tbadge.t4{border-color:#fff;color:#fff}
 .tbadge.t4{background:#fff;color:#141414}
-.bcard h3{margin:4px 0 0;font-weight:400;font-size:18px;line-height:1.3;min-height:2.6em}
+.bcard h3{margin:4px 0 0;font-weight:400;font-size:18px;line-height:1.3}
 .bcard .price{font-size:24px;font-weight:300}
 .price-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .wt{border:1px solid var(--line-strong);border-radius:999px;padding:2px 10px;font-size:13px;color:var(--muted);white-space:nowrap}
@@ -956,19 +966,26 @@ function card(b,missing){
     ["מערכת הילוכים",b.es===1?"חשמלית":b.es===0?"מכנית":"—"],
     ["שלדה",MAT[b.f]||"—"],
     (b.s==="mtb"||b.s==="emtb")?["שיכוך",SUS_HE[b.susp]||"—"]:["גלגלים",b.cw===1?"קרבון":b.cw===0?"אלומיניום":"—"]];
+  const seller=b.usd?"ישיר מהיצרן · גרמניה":`משווק: ${b.src}`;
+  const name=b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"");
+  // fixed card rows (same position on every card): head · name · tier · price · specs · notes · link
   return `<article class="bcard">
-    <header>${LOGOS[b.b]?brandLogo(b.b,true):brandLogo(b.b)}<div><div class="bb">${b.b}</div><div class="seller">${b.usd?"רכישה ישירה מהיצרן · גרמניה":`משווק בישראל: ${b.src}`}</div></div>
-      ${b.t?`<span class="tbadge t${b.t}">רמה ${b.t} · ${TIERS[b.t-1].he}</span>`:""}</header>
-    <h3>${b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"")}</h3>
-    <div class="price-row"><div class="price">${price}</div>${b.w?`<div class="wt"><b>${b.w}</b> ק"ג</div>`:""}</div>${sub?`<div class="psub">${sub}</div>`:""}
-    <dl>${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
-    ${b.fs?`<div class="psub">שלדה בלבד</div>`:""}
-    ${b.fill?`<div class="psub">המפרט לפי ${b.fill} (אותו דגם; המוכר לא פרסם מפרט)</div>`:""}
-    ${b.gv?`<div class="psub">ההילוכים לא פורסמו באתר המוכר; לפי <a href="${b.gv}" target="_blank" rel="noopener">מקור חיצוני לאותו דגם ↗</a></div>`:""}
-    ${b.gs?`<div class="psub">ההילוכים לפי תיאור המוצר באתר המוכר</div>`:""}
-    ${b.fv?`<div class="psub">חומר השלדה לא פורסם באתר המוכר; אומת מול <a href="${b.fv.u}" target="_blank" rel="noopener" title="${b.fv.t.replace(/"/g,"&quot;")}">מקור חיצוני ↗</a></div>`:""}
-    ${sizeFit(b)}
-    ${missing&&missing.length?`<div class="miss">חסר באתר המוכר: ${missing.join(", ")}</div>`:""}
+    <header class="bc-head"><span class="bc-logo">${LOGOS[b.b]?brandLogo(b.b,true):brandLogo(b.b)}</span>
+      <div class="bc-id"><div class="bb" title="${b.b}">${b.b}</div><div class="seller" title="${seller}">${seller}</div></div></header>
+    <h3 class="bc-name" title="${name.replace(/"/g,"&quot;")}">${name}</h3>
+    <div class="bc-tier">${b.t?`<span class="tbadge t${b.t}">רמה ${b.t} · ${TIERS[b.t-1].he}</span>`:""}</div>
+    <div class="bc-price"><div class="price-row"><div class="price">${price}</div>${b.w?`<div class="wt"><b>${b.w}</b> ק"ג</div>`:""}</div>
+      <div class="psub one" title="${sub}">${sub||"&nbsp;"}</div></div>
+    <dl>${rows.map(([k,v])=>`<div><dt>${k}</dt><dd title="${String(v).replace(/"/g,"&quot;")}">${v}</dd></div>`).join("")}</dl>
+    <div class="bc-notes">
+      ${b.fs?`<div class="psub">שלדה בלבד</div>`:""}
+      ${b.fill?`<div class="psub">המפרט לפי ${b.fill} (אותו דגם)</div>`:""}
+      ${b.gv?`<div class="psub">הילוכים: לפי <a href="${b.gv}" target="_blank" rel="noopener">מקור חיצוני ↗</a></div>`:""}
+      ${b.gs?`<div class="psub">הילוכים: לפי תיאור המוצר אצל המוכר</div>`:""}
+      ${b.fv?`<div class="psub">חומר שלדה: לפי <a href="${b.fv.u}" target="_blank" rel="noopener" title="${b.fv.t.replace(/"/g,"&quot;")}">מקור חיצוני ↗</a></div>`:""}
+      ${missing&&missing.length?`<div class="miss">חסר באתר המוכר: ${missing.join(", ")}</div>`:""}
+      ${sizeFit(b)}
+    </div>
     <a class="go-link" href="${b.u}" target="_blank" rel="noopener">לדף המוצר ↗</a>
   </article>`;
 }
