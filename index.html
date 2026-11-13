@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>מוצא האופניים</title>
+<title>מאתר האופניים · כל האופניים בישראל</title>
+<meta name="description" content="מאתר האופניים · כל האופניים בישראל: מוצאים את האופניים שמתאימים לך לפי סגנון רכיבה, מידות ותקציב, מכל היבואנים והחנויות.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -29,6 +30,8 @@ header.top{display:flex;align-items:center;justify-content:space-between;height:
 .top-restart{font:inherit;font-size:14px;color:var(--ink,#fff);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer}
 .top-restart:hover{border-color:#fff}
 .logo b{font-weight:600}
+.logo{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;text-align:right}
+.logo .tagline{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.2px;margin-top:2px}
 .tabs{display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow:hidden}
 .tsep{flex:none;width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.6}
 @media (max-width:560px){.tabs{gap:0;justify-content:space-between}.tabs .tab{font-size:13px}}
@@ -346,7 +349,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 <body>
 <div class="wrap">
   <header class="top">
-    <button class="logo restart" type="button" aria-label="מוצא האופניים - חזרה להתחלה"><b>מוצא</b> האופניים</button>
+    <button class="logo restart" type="button" aria-label="מאתר האופניים - חזרה להתחלה"><span><b>מאתר</b> האופניים</span><span class="tagline">כל האופניים בישראל</span></button>
     <button class="top-restart restart" type="button" hidden>חיפוש חדש ↺</button>
   </header>
   <nav class="tabs" aria-label="שלבים">
