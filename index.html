@@ -263,6 +263,11 @@ body{padding-bottom:96px}
 .res-actions{display:flex;gap:10px;flex-wrap:wrap}
 .end-actions{margin-top:40px;padding-top:28px;border-top:1px solid var(--line)}
 .filters{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:18px}
+.sort-row{display:flex;align-items:center;gap:12px;margin:6px 0 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sort-row::-webkit-scrollbar{display:none}
+.sort-label{flex:none;font-size:14px;color:var(--muted)}
+.sort-row .opt-row{display:flex;flex-wrap:nowrap;gap:8px}
+.sort-row .opt{flex:none;height:36px;padding:0 14px;font-size:13px;white-space:nowrap;justify-content:center}
 .filters summary{display:none}
 .filters[open]{padding-top:14px}
 .filters:not([open]){border:0;margin:0}
@@ -480,13 +485,11 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
         <button class="btn ghost restart">חיפוש חדש ↺</button>
       </div>
     </div>
+    <!-- sort: always visible under the results title; every other filter stays behind the funnel button -->
+    <div class="sort-row"><span class="sort-label">מיון</span><div class="opt-row small" id="sortOpts"></div></div>
     <details class="filters" id="filters" open>
-      <summary>סינון ומיון</summary>
+      <summary>סינון</summary>
       <div class="fgrid">
-        <div class="fbox">
-          <div class="flabel">מיון</div>
-          <div class="opt-row small" id="sortOpts"></div>
-        </div>
         <div class="fbox">
           <div class="flabel">טווח מחיר <span id="rngVal"></span></div>
           <div class="dual" id="dual">
@@ -1018,7 +1021,9 @@ function sorted(L){
 }
 function card(b,missing){
   const price=b.est?`≈ ₪${fmt(b.p)}`:b.p!=null?`${b.pf?"החל מ-":""}₪${fmt(b.p)}`:"מחיר לא ידוע";
-  const sub=b.usd?`$${fmt(+b.usd)} + $${fmt(+b.ship||0)} משלוח · לפני מע"מ ומכס`:(b.pf?"טווח מחירים לפי מידה/צבע":
+  // Canyon: rough import estimate (bike + shipping + 18% VAT; no customs line for bicycles; e-bike customs not verified)
+  const sub=b.usd?`הערכה גסה: $${fmt(+b.usd)} + $${fmt(+b.ship||0)} משלוח + מע"מ 18%${b.e?" · מכס לא ידוע":""}`:
+    b.pc?`מחיר מועדון ליטלי: ₪${fmt(b.pc)}`:(b.pf?"טווח מחירים לפי מידה/צבע":
     b.p==null&&b.pe?`המוכר לא מפרסם מחיר · הערכה: מ-₪${fmt(b.pe)}`:"");
   const rows=[
     ["הילוכים",b.g||"—"],
