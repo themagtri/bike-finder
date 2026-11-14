@@ -487,7 +487,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
     </div>
     <!-- sort: always visible under the results title; every other filter stays behind the funnel button -->
     <div class="sort-row"><span class="sort-label">מיון</span><div class="opt-row small" id="sortOpts"></div></div>
-    <details class="filters" id="filters" open>
+    <details class="filters" id="filters">
       <summary>סינון</summary>
       <div class="fgrid">
         <div class="fbox">
@@ -585,7 +585,7 @@ function go(n){
   { const tr=$(".top-restart"); if(tr) tr.hidden=(n===1); }
   const tn=n==="1b"?1:n;
   $$(".tab").forEach(b=>{const k=+b.dataset.go;b.classList.toggle("on",k===tn);b.disabled=(k===2&&!S.style)||(k>=3&&!bodyValid());});
-  if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4)renderResults(false);
+  if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4){$("#filters").open=false;renderResults(false);}
   chips(); updateFab(false); window.scrollTo({top:0,behavior:"smooth"});
 }
 $$("[data-go]").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.go)));
@@ -1101,7 +1101,7 @@ function renderResults(keepRange){
 $("#more").addEventListener("click",()=>{S.shown+=24;renderResults(true);});
 $("#brandsAll").addEventListener("click",()=>{S.hidden.clear();renderResults(true);});
 function refreshAll(){ if($("#s4").classList.contains("on")) renderResults(true); else refreshSearch(); }
-if(matchMedia("(max-width:700px)").matches) $("#filters").removeAttribute("open");
+// filter panel: closed by default on every screen size, opened only by the funnel button
 { const fb=$("#filterBtn"), fl=$("#filters"), sync=()=>fb.setAttribute("aria-expanded",fl.open);
   fb.addEventListener("click",()=>{fl.open=!fl.open;sync();}); fl.addEventListener("toggle",sync); sync(); }
 drawRing();chips();
