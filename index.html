@@ -87,8 +87,10 @@ section.screen.on{display:block}
 .seg.sel .shape{transform:scale(1.06)}
 .seg.sel .shade{opacity:.25}
 .seg.sel .edge{stroke:#fff;stroke-width:3}
-.fab{position:fixed;bottom:22px;left:22px;z-index:40;width:68px;height:68px;border-radius:50%;border:0;background:#fff;color:#141414;font:inherit;font-size:15px;font-weight:600;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 24px rgba(0,0,0,.45);transition:transform .2s ease,opacity .2s ease,background .2s ease}
+.fab{position:fixed;bottom:22px;left:22px;z-index:40;width:68px;height:68px;border-radius:50%;border:0;background:#fff;color:#141414;font:inherit;font-size:15px;font-weight:600;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 24px rgba(0,0,0,.45);transition:transform .2s ease,opacity .2s ease}
 .fab span{display:block;line-height:1.1;text-align:center}
+.fab:not(:disabled) span{color:#141414}
+.fab:disabled span{color:#8a8a8a}
 .fab small{display:block;font-size:16px;font-weight:400}
 .fab:not(:disabled):active{transform:scale(.94)}
 .fab:disabled{background:#3a3a3a;color:#8a8a8a;box-shadow:none;cursor:default}
@@ -319,6 +321,28 @@ body{padding-bottom:96px}
 .wlogo img{max-height:20px;max-width:96px;object-fit:contain}
 footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
 footer.credits a{color:inherit}
+/* ---- accessibility (IS 5568 / WCAG 2.0 AA) ---- */
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;top:-80px;inset-inline-start:12px;z-index:60;background:#fff;color:#141414;padding:10px 16px;border-radius:8px;font-weight:600;text-decoration:none}
+.skip:focus{top:12px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.a11y-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--text);display:grid;place-items:center;cursor:pointer;padding:0;flex:none}
+.a11y-btn svg{width:20px;height:20px}
+.a11y-panel{position:fixed;z-index:55;top:calc(64px + env(safe-area-inset-top));inset-inline-end:max(16px,env(safe-area-inset-left));width:min(300px,calc(100vw - 32px));background:#1c1c1c;border:1px solid var(--line-strong);border-radius:14px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-size:14px}
+.a11y-panel h2{font-size:15px;font-weight:600;margin:0 0 10px}
+.a11y-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.a11y-row .seg3{display:flex;gap:6px}
+.a11y-panel button.opt-a{font:inherit;font-size:13px;min-width:40px;height:34px;padding:0 10px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;color:var(--text);cursor:pointer}
+.a11y-panel button.opt-a[aria-pressed=true]{background:#fff;color:#141414;border-color:#fff}
+.a11y-panel .a11y-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--line);margin-top:2px}
+.a11y-panel .a11y-foot a{color:var(--text);font-size:13px}
+html.a11y-contrast{--muted:#e8e8e8;--line:rgba(255,255,255,.45);--line-strong:rgba(255,255,255,.8)}
+html.a11y-contrast body{background:#000}
+html.a11y-contrast .bcard,html.a11y-contrast .card{background:#000;border-color:rgba(255,255,255,.6)}
+html.a11y-links a{text-decoration:underline!important;text-underline-offset:3px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+html.a11y-still *,html.a11y-still *::before,html.a11y-still *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 /* cookie consent bar (Meta Pixel only): small, bottom, never covers the continue button */
 .consent{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;align-items:center;gap:12px;background:rgba(24,24,24,.97);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--line-strong);padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));font-size:13px;line-height:1.45;color:#d8d8d8}
 .consent p{margin:0;flex:1;min-width:0}
@@ -377,11 +401,24 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">דלג לתוכן הראשי</a>
 <div class="wrap">
   <header class="top">
     <button class="logo restart" type="button" aria-label="מאתר האופניים - חזרה להתחלה"><span><b>מאתר</b> האופניים</span><span class="tagline">כל האופניים בישראל</span></button>
-    <button class="top-restart restart" type="button" hidden>חיפוש חדש ↺</button>
+    <div class="top-actions">
+      <button class="top-restart restart" type="button" hidden>חיפוש חדש ↺</button>
+      <button class="a11y-btn" id="a11yBtn" type="button" aria-label="תפריט נגישות" aria-expanded="false" aria-controls="a11yPanel"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="4" r="2"/><path d="M19 8.5c0 .5-.4.9-.9 1l-4.1.7v3.3l2.2 6.1a1 1 0 0 1-1.9.7L12 14.6l-2.3 5.7a1 1 0 0 1-1.9-.7l2.2-6.1v-3.3l-4.1-.7a1 1 0 0 1 .3-2l4.4.7h2.8l4.4-.7c.6-.1 1.2.4 1.2 1z"/></svg></button>
+    </div>
   </header>
+  <div class="a11y-panel" id="a11yPanel" role="dialog" aria-label="הגדרות נגישות" hidden>
+    <h2>נגישות</h2>
+    <div class="a11y-row"><span>גודל טקסט</span><div class="seg3"><button class="opt-a" type="button" data-zoom="1" aria-pressed="true">רגיל</button><button class="opt-a" type="button" data-zoom="1.15" aria-pressed="false">גדול</button><button class="opt-a" type="button" data-zoom="1.3" aria-pressed="false">גדול מאוד</button></div></div>
+    <div class="a11y-row"><span>ניגודיות גבוהה</span><button class="opt-a" type="button" data-mode="contrast" aria-pressed="false">הפעל</button></div>
+    <div class="a11y-row"><span>הדגשת קישורים</span><button class="opt-a" type="button" data-mode="links" aria-pressed="false">הפעל</button></div>
+    <div class="a11y-row"><span>עצירת אנימציות</span><button class="opt-a" type="button" data-mode="still" aria-pressed="false">הפעל</button></div>
+    <div class="a11y-foot"><a href="accessibility.html" target="_blank" rel="noopener">הצהרת נגישות</a><button class="opt-a" type="button" id="a11yReset">איפוס</button></div>
+  </div>
+  <main id="main" tabindex="-1">
   <nav class="tabs" aria-label="שלבים">
     <button class="tab on" data-go="1">סגנון רכיבה</button>
     <span class="tsep" aria-hidden="true"></span>
@@ -500,7 +537,7 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
     <div class="res-head">
       <div>
         <div class="res-title-row">
-          <h1 id="resTitle">תוצאות</h1>
+          <h1 id="resTitle" aria-live="polite">תוצאות</h1>
           <button type="button" class="filter-btn" id="filterBtn" aria-controls="filters" aria-expanded="true" aria-label="סינון ומיון" title="סינון ומיון"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 5h18l-7 8.2V19l-4 2v-7.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
         </div>
         <p class="lead" id="resLead" style="margin-bottom:0" hidden></p>
@@ -569,10 +606,11 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
     <div class="recs-list deals-list" id="dealsList"></div>
     <div class="actions end-actions"><button class="btn" id="dealsBack">חזרה לתוצאות</button></div>
   </section>
+  </main>
 </div>
 
 <div class="wrap"><footer class="credits">
-  צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json" target="_blank" rel="noopener">logos/credits.json</a>). סטטיסטיקה אנונימית: GoatCounter, בלי עוגיות ובלי מידע אישי.<span id="metaNote" hidden> מדידת פרסום של Meta: רק באישורך · <a href="#" id="consentSettings">הגדרות עוגיות</a>.</span> <a href="privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a>.
+  צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json" target="_blank" rel="noopener">logos/credits.json</a>). סטטיסטיקה אנונימית: GoatCounter, בלי עוגיות ובלי מידע אישי.<span id="metaNote" hidden> מדידת פרסום של Meta: רק באישורך · <a href="#" id="consentSettings">הגדרות עוגיות</a>.</span> <a href="privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a> · <a href="terms.html" target="_blank" rel="noopener">תנאי שימוש</a> · <a href="accessibility.html" target="_blank" rel="noopener">הצהרת נגישות</a>.
   הסימנים המסחריים שייכים לבעליהם ומוצגים לצורך זיהוי המותג בלבד.
 </footer></div>
 <script src="data.js"></script>
@@ -686,12 +724,12 @@ const REC_IMGS=["photo-1576435728678-68d0fbf94e91","photo-1596738141905-51e94b51
 /* selection before moving on: S.pick (riding style) and S.discPick (MTB type) */
 function selectStyle(k){
   S.pick=k;
-  $$(".seg").forEach(g=>g.classList.toggle("sel",g.dataset.k===k)); $("#ring").classList.add("has-sel");
+  $$(".seg").forEach(g=>{g.classList.toggle("sel",g.dataset.k===k); g.setAttribute("aria-pressed",g.dataset.k===k);}); $("#ring").classList.add("has-sel");
   updateFab(true);
 }
 function selectDisc(d){
   S.discPick=d;
-  $$("#strip .disc").forEach(b=>b.classList.toggle("sel",b.dataset.d===d)); $("#strip").classList.add("has-sel");
+  $$("#strip .disc").forEach(b=>{b.classList.toggle("sel",b.dataset.d===d); b.setAttribute("aria-pressed",b.dataset.d===d);}); $("#strip").classList.add("has-sel");
   updateFab(true);
 }
 let CUR=1;
@@ -1174,6 +1212,55 @@ drawRing();chips();
 <script>if(typeof updateFab==="function")updateFab(false);</script>
 <script>
 /* anonymous statistics (GoatCounter, no cookies, no personal data): page views, searches by style, exits to sellers */
+/* ---- accessibility: keep keyboard focus inside an open pop-up, and return it when the pop-up closes ---- */
+(function(){
+  const FOC='a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])';
+  const pops=[...document.querySelectorAll(".modal,.a11y-panel")];
+  let lastOutside=null;   // where focus was before a pop-up opened
+  // remember the element that opened the pop-up: the click / key press happens just before the pop-up opens
+  const remember=e=>{ if(pops.some(m=>!m.hidden)) return;
+    const c=e.target.closest&&e.target.closest(".bcard"), a=c&&c.querySelector("a.go-link");
+    lastOutside=a||e.target.closest("a,button,[tabindex]")||document.activeElement; };
+  document.addEventListener("click",remember,true);
+  document.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" ") remember(e); },true);
+  pops.forEach(m=>{
+    new MutationObserver(()=>{
+      if(m.hidden&&!pops.some(x=>!x.hidden)&&lastOutside&&document.contains(lastOutside)&&lastOutside.offsetParent!==null) lastOutside.focus();
+    }).observe(m,{attributes:true,attributeFilter:["hidden"]});
+  });
+  document.addEventListener("keydown",e=>{
+    if(e.key!=="Tab") return;
+    const m=[...document.querySelectorAll(".modal")].find(x=>!x.hidden); if(!m) return;
+    const f=[...m.querySelectorAll(FOC)].filter(x=>x.offsetParent!==null); if(!f.length) return;
+    if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}
+    else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();}
+  });
+})();
+/* ---- accessibility menu: text size, high contrast, highlighted links, no animations (remembered on this device) ---- */
+(function(){
+  const KEY="bf_a11y_v1", btn=document.getElementById("a11yBtn"), panel=document.getElementById("a11yPanel"), root=document.documentElement;
+  if(!btn||!panel) return;
+  let st={zoom:1,contrast:false,links:false,still:false};
+  try{Object.assign(st,JSON.parse(localStorage.getItem(KEY)||"{}"));}catch(e){}
+  function apply(){
+    document.body.style.zoom=st.zoom===1?"":String(st.zoom);
+    root.classList.toggle("a11y-contrast",!!st.contrast); root.classList.toggle("a11y-links",!!st.links); root.classList.toggle("a11y-still",!!st.still);
+    panel.querySelectorAll("[data-zoom]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.zoom===st.zoom)));
+    panel.querySelectorAll("[data-mode]").forEach(b=>{const on=!!st[b.dataset.mode]; b.setAttribute("aria-pressed",String(on)); b.textContent=on?"כבה":"הפעל";});
+    try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}
+  }
+  function open(v){panel.hidden=!v; btn.setAttribute("aria-expanded",String(v)); if(v){const f=panel.querySelector("button"); f&&f.focus();} else btn.focus();}
+  btn.addEventListener("click",()=>open(panel.hidden));
+  panel.addEventListener("click",e=>{
+    const z=e.target.closest("[data-zoom]"), m=e.target.closest("[data-mode]");
+    if(z){st.zoom=+z.dataset.zoom;apply();}
+    else if(m){st[m.dataset.mode]=!st[m.dataset.mode];apply();}
+    else if(e.target.closest("#a11yReset")){st={zoom:1,contrast:false,links:false,still:false};apply();}
+  });
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!panel.hidden){open(false);}});
+  document.addEventListener("click",e=>{if(!panel.hidden&&!panel.contains(e.target)&&!btn.contains(e.target)) open(false);});
+  apply();
+})();
 /* Meta Pixel - loads ONLY after the visitor presses "אישור". While PIXEL_ID is empty the bar and the pixel stay off. */
 const PIXEL_ID="1457261093261431";                       // Meta Pixel ID from Events Manager (digits only)
 const CONSENT_KEY="bf_consent_v1";
