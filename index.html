@@ -162,6 +162,7 @@ body{padding-bottom:96px}
 /* ---- 3: search ---- */
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
 @media (max-width:640px){.modes{grid-template-columns:1fr}}
+.mode[hidden]{display:none}
 .mode{border:1px solid var(--line-strong);background:transparent;border-radius:var(--radius);padding:20px;text-align:right;cursor:pointer}
 .mode{position:relative;overflow:hidden;isolation:isolate}
 .mode h3,.mode p{position:relative;z-index:1}
@@ -590,12 +591,14 @@ const STYLES = [
 const TIERS=[{n:1,he:"בסיס",en:"Entry"},{n:2,he:"ביניים",en:"Mid"},{n:3,he:"גבוה",en:"High"},{n:4,he:"עילית",en:"Elite"}];
 // agreed tier table (trim_levels.md) - definitions unchanged
 const TIER_ROWS=[
+  // gravel row added with the user's approval 2026-11-15: GRX tiers match road tiers, SRAM keeps its road ladder (XPLR)
+  {k:"gravel",he:"גראבל",cells:["GRX 400 / 600, SRAM Apex מכני","SRAM Apex AXS / Rival","GRX 800 / GRX Di2, SRAM Force","SRAM Red"]},
   {k:"road",he:"כביש",cells:["Shimano Tiagra/105, אלומיניום","105 Di2, קרבון / SRAM Rival","Ultegra / SRAM Force","Dura-Ace / SRAM Red"]},
   {k:"fs",he:"הרים – שיכוך מלא",cells:["Deore","SLX / SRAM NX","XT / SRAM GX","XTR / SRAM X0, XX"]},
   {k:"ht",he:"הרים – זנב קשיח XC",cells:["Deore","SLX","XT / GX, קרבון","XTR / XX"]},
   {k:"tt",he:'נג"ש / טריאתלון',cells:["105 / 105 Di2","Ultegra / SRAM Rival AXS","Ultegra Di2 / SRAM Force AXS","Dura-Ace Di2 / SRAM Red AXS"]},
 ];
-const ROW_FOR={road:["road"],tt:["tt"],mtb:["fs","ht"],gravel:[],emtb:[]};
+const ROW_FOR={road:["road"],tt:["tt"],mtb:["fs","ht"],gravel:["gravel"],emtb:[]};
 const S={style:null,gender:null,h:null,leg:null,mode:"budget",bMin:null,bMax:null,tiers:new Set()};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const fmt=n=>n.toLocaleString("he-IL");
@@ -997,7 +1000,7 @@ const missingWhat=()=>[S.mode==="tier"&&hasTiers()?"ההילוכים (המוכר
 function refreshSearch(){
   const st=styleOf(S.style),rows=rowsFor();
   if(!hasTiers()&&S.mode==="tier")S.mode="budget";
-  $(".mode[data-mode='tier']").disabled=!hasTiers();
+  { const tm=$(".mode[data-mode='tier']"); tm.hidden=!hasTiers(); tm.disabled=false; }
   $("#tierModeSub").textContent=hasTiers()?"בסיס, ביניים, גבוה או עילית":`אין עדיין טבלת רמות ל${st.he}`;
   $("#bChips").innerHTML=BUDGETS.map((b,i)=>`<button data-i="${i}" aria-pressed="${(S.bMin||0)===b[0]&&S.bMax===b[1]}">${b[2]} ₪</button>`).join("");
   $$("#bChips button").forEach(x=>x.addEventListener("click",()=>{const b=BUDGETS[+x.dataset.i];S.bMin=b[0]||null;S.bMax=b[1];$("#bMin").value=S.bMin??"";$("#bMax").value=S.bMax??"";refreshAll();}));
