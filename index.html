@@ -385,6 +385,7 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
 .tbadge{font-size:11px;border:1px solid var(--line-strong);border-radius:999px;padding:2px 9px;white-space:nowrap;color:var(--muted)}
 .tbadge.t3,.tbadge.t4{border-color:#fff;color:#fff}
 .tbadge.t4{background:#fff;color:#141414}
+.tag-old{font-size:11px;font-weight:700;background:#ffd60a;color:#141414;border-radius:999px;padding:2px 9px;white-space:nowrap;margin-inline-start:6px}
 .bcard h3{margin:4px 0 0;font-weight:400;font-size:18px;line-height:1.3}
 .bcard .price{font-size:24px;font-weight:300}
 .price-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
@@ -1089,7 +1090,7 @@ const SORTS=[["price","מחיר: מהזול"],["price-d","מחיר: מהיקר"]
 function sorted(L){
   // unknown price sorts after the priced models (an estimate is only a floor, not a price)
   const by={price:(a,b)=>(a.p??1e9)-(b.p??1e9),"price-d":(a,b)=>(b.p??-1)-(a.p??-1),tier:(a,b)=>(b.t??0)-(a.t??0)||(a.p??1e9)-(b.p??1e9),weight:(a,b)=>(a.w??99)-(b.w??99)};
-  return L.slice().sort(by[S.sort]);
+  return L.slice().sort((a,b)=>(a.old?1:0)-(b.old?1:0)||by[S.sort](a,b));   // surplus / previous-collection models after current ones
 }
 function card(b,missing){
   const price=b.est?`≈ ₪${fmt(b.p)}`:b.p!=null?`${b.pf?"החל מ-":""}₪${fmt(b.p)}`:"מחיר לא ידוע";
@@ -1110,7 +1111,7 @@ function card(b,missing){
     <header class="bc-head"><span class="bc-logo">${LOGOS[b.b]?brandLogo(b.b,true):`<span class="wlogo wtext">${b.b}</span>`}</span>
       <div class="bc-id"><div class="bb" title="${b.b}">${b.b}</div><div class="seller" title="${seller}">${seller}</div></div></header>
     <h3 class="bc-name" title="${name.replace(/"/g,"&quot;")}">${name}</h3>
-    <div class="bc-tier">${b.t?`<span class="tbadge t${b.t}">רמה ${b.t} · ${TIERS[b.t-1].he}</span>`:""}</div>
+    <div class="bc-tier">${b.t?`<span class="tbadge t${b.t}">רמה ${b.t} · ${TIERS[b.t-1].he}</span>`:""}${b.old?`<span class="tag-old">דגם עודפים</span>`:""}</div>
     <div class="bc-price"><div class="price-row"><div class="price">${price}</div>${b.w?`<div class="wt"><b>${b.w}</b> ק"ג</div>`:""}</div>
       <div class="psub one" title="${sub}">${sub||"&nbsp;"}</div></div>
     <dl>${rows.map(([k,v])=>`<div><dt>${k}</dt><dd title="${String(v).replace(/"/g,"&quot;")}">${v}</dd></div>`).join("")}</dl>
