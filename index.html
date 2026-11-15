@@ -281,6 +281,11 @@ body{padding-bottom:96px}
 .sort-row{display:flex;align-items:center;gap:12px;margin:6px 0 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .sort-row::-webkit-scrollbar{display:none}
 .sort-label{flex:none;font-size:14px;color:var(--muted)}
+.size-help{display:inline-block;margin:-4px 0 16px;background:none;border:0;padding:4px 0;color:var(--text);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.size-table{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:14px}
+.size-table th,.size-table td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+.size-table th{color:var(--muted);font-weight:400;font-size:12px}
+.size-table td.num{font-variant-numeric:tabular-nums}
 .sort-row .opt-row{display:flex;flex-wrap:nowrap;gap:8px}
 .sort-row .opt{flex:none;height:36px;padding:0 14px;font-size:13px;white-space:nowrap;justify-content:center}
 .filters summary{display:none}
@@ -422,8 +427,6 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
   <nav class="tabs" aria-label="שלבים">
     <button class="tab on" data-go="1">סגנון רכיבה</button>
     <span class="tsep" aria-hidden="true"></span>
-    <button class="tab" data-go="2" disabled>מידות גוף</button>
-    <span class="tsep" aria-hidden="true"></span>
     <button class="tab" data-go="3" disabled>העדפות</button>
     <span class="tsep" aria-hidden="true"></span>
     <button class="tab" data-go="4" disabled>תוצאות</button>
@@ -528,7 +531,7 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
     </div>
     <p class="count" id="prefCount"></p>
     <div class="actions" hidden>
-      <button class="btn ghost" data-go="2">חזרה</button>
+      <button class="btn ghost" data-go="1">חזרה</button>
       <button class="btn" id="showRes">הצג תוצאות</button>
     </div>
   </section>
@@ -549,6 +552,7 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
     </div>
     <!-- sort: always visible under the results title; every other filter stays behind the funnel button -->
     <div class="sort-row"><span class="sort-label">מיון</span><div class="opt-row small" id="sortOpts"></div></div>
+    <button type="button" class="size-help" id="sizeHelpBtn">איזו מידה מתאימה לי?</button>
     <details class="filters" id="filters">
       <summary>סינון</summary>
       <div class="fgrid">
@@ -644,12 +648,12 @@ const styleOf=k=>STYLES.find(s=>s.k===k);
 
 /* navigation */
 function go(n){
-  if(n>=2&&!S.style)return; if(n>=3&&!bodyValid())return;
+  if(n>=2&&!S.style)return;
   $$("section.screen").forEach(s=>s.classList.toggle("on",s.id==="s"+n));
   CUR=n;
   { const tr=$(".top-restart"); if(tr) tr.hidden=(n===1); }
   const tn=n==="1b"?1:n;
-  $$(".tab").forEach(b=>{const k=+b.dataset.go;b.classList.toggle("on",k===tn);b.disabled=(k===2&&!S.style)||(k>=3&&!bodyValid());});
+  $$(".tab").forEach(b=>{const k=+b.dataset.go;b.classList.toggle("on",k===tn);b.disabled=(k>=2&&!S.style);});
   if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4){$("#filters").open=false;renderResults(false);track(`results/${S.style}${S.style==="mtb"&&S.disc&&S.disc!=="any"?"-"+S.disc:""}`,"תוצאות");}
   chips(); updateFab(false); window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -743,13 +747,13 @@ function updateFab(pulse){
 }
 function fabNext(){
   if(CUR===1&&S.pick) pickStyle(S.pick);
-  else if(CUR==="1b"&&S.discPick){S.disc=S.discPick; go(2);}
+  else if(CUR==="1b"&&S.discPick){S.disc=S.discPick; go(3);}
   else if(CUR===2&&bodyValid()) go(3);
   else if(CUR===3&&!$("#showRes").disabled) $("#showRes").click();
 }
 function pickStyle(k){
   S.style=k; S.disc="any"; S.sus="any";
-  if(k==="mtb"){renderStrip(); go("1b");} else go(2);
+  if(k==="mtb"){renderStrip(); go("1b");} else go(3);
 }
 function renderStrip(){
   const all=BIKES.filter(b=>b.s==="mtb");
@@ -1110,7 +1114,6 @@ function card(b,missing){
     <div class="bc-price"><div class="price-row"><div class="price">${price}</div>${b.w?`<div class="wt"><b>${b.w}</b> ק"ג</div>`:""}</div>
       <div class="psub one" title="${sub}">${sub||"&nbsp;"}</div></div>
     <dl>${rows.map(([k,v])=>`<div><dt>${k}</dt><dd title="${String(v).replace(/"/g,"&quot;")}">${v}</dd></div>`).join("")}</dl>
-    <div class="bc-size">${sizeFit(b)}</div>
     <div class="bc-notes">
       ${b.fs?`<div class="psub">שלדה בלבד</div>`:""}
       ${b.pn?`<div class="psub">${b.pn}</div>`:""}
@@ -1172,6 +1175,7 @@ $("#more").addEventListener("click",()=>{S.shown+=24;renderResults(true);});
 $("#brandsAll").addEventListener("click",()=>{S.hidden.clear();renderResults(true);});
 function refreshAll(){ if($("#s4").classList.contains("on")) renderResults(true); else refreshSearch(); }
 // filter panel: closed by default on every screen size, opened only by the funnel button
+window.__size={road:SIZE_ROAD,mtb:SIZE_MTB,style:()=>S.style,isRoadish};   // for the optional size-help pop-up (separate script)
 { const fb=$("#filterBtn"), fl=$("#filters"), sync=()=>fb.setAttribute("aria-expanded",fl.open);
   fb.addEventListener("click",()=>{fl.open=!fl.open;sync();}); fl.addEventListener("toggle",sync); sync(); }
 drawRing();chips();
@@ -1186,6 +1190,19 @@ drawRing();chips();
       <a class="btn" id="leaveGo" href="#" target="_blank" rel="noopener">המשך לדף המוצר ↗</a>
       <button type="button" class="btn ghost" id="leaveDeals">בדוק את פינת המבצעים והמומלצים</button>
     </div>
+  </div>
+</div>
+<div class="modal" id="sizeModal" hidden role="dialog" aria-modal="true" aria-labelledby="sizeModalT">
+  <div class="modal-box">
+    <button type="button" class="modal-x" aria-label="סגירה">✕</button>
+    <h3 id="sizeModalT">איזו מידה מתאימה לי?</h3>
+    <p class="help" style="margin-top:0">הטבלה כללית ונותנת כיוון בלבד. לכל יצרן טבלת מידות משלו, ובאותו גובה אפשר להתאים מידות שונות לפי אורך הרגליים, הגמישות וסגנון הרכיבה.</p>
+    <table class="size-table" id="sizeTable"></table>
+    <ul class="help">
+      <li>בדקו את טבלת המידות בדף הדגם אצל היצרן או המוכר.</li>
+      <li>הכי טוב: לנסות את האופניים בחנות, או לעשות התאמה אצל מתאים אופניים (Bike Fit) מוסמך.</li>
+      <li>לפני שקונים, כדאי לוודא עם המוכר שהמידה המתאימה לכם במלאי.</li>
+    </ul>
   </div>
 </div>
 <div class="modal" id="legModal" hidden role="dialog" aria-modal="true" aria-labelledby="legModalT">
@@ -1212,6 +1229,21 @@ drawRing();chips();
 <script>if(typeof updateFab==="function")updateFab(false);</script>
 <script>
 /* anonymous statistics (GoatCounter, no cookies, no personal data): page views, searches by style, exits to sellers */
+/* ---- optional size help (general table for the chosen style; no personal recommendation) ---- */
+(function(){
+  const m=document.getElementById("sizeModal"), btn=document.getElementById("sizeHelpBtn"); if(!m||!btn) return;
+  function fill(){
+    const z=window.__size; if(!z) return; const road=z.isRoadish(z.style()), T=road?z.road:z.mtb;
+    const head=`<thead><tr><th>גובה (ס"מ)</th><th>מידה</th><th>${road?'שלדה (ס"מ)':'שלדה (אינץ\')'}</th></tr></thead>`;
+    const rows=T.map(r=>`<tr><td class="num">${r[0]===0?"עד "+r[1]:r[1]===999?r[0]+"+":r[0]+"–"+r[1]}</td><td>${r[2]}</td><td class="num">${r[3]}–${r[4]}</td></tr>`).join("");
+    document.getElementById("sizeTable").innerHTML=head+"<tbody>"+rows+"</tbody>";
+    document.getElementById("sizeModalT").textContent=road?"איזו מידה מתאימה לי? (כביש, גראבל, נג\"ש)":"איזו מידה מתאימה לי? (אופני הרים)";
+  }
+  const close=()=>{m.hidden=true;};
+  btn.addEventListener("click",()=>{fill(); m.hidden=false; const x=m.querySelector(".modal-x"); x&&x.focus(); if(typeof track==="function") track("help/size","מידה מתאימה");});
+  m.addEventListener("click",e=>{if(e.target===m||e.target.closest(".modal-x")) close();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!m.hidden) close();});
+})();
 /* ---- accessibility: keep keyboard focus inside an open pop-up, and return it when the pop-up closes ---- */
 (function(){
   const FOC='a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])';
