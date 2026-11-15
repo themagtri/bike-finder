@@ -559,7 +559,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 </div>
 
 <div class="wrap"><footer class="credits">
-  צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json" target="_blank" rel="noopener">logos/credits.json</a>).
+  צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json" target="_blank" rel="noopener">logos/credits.json</a>). סטטיסטיקה אנונימית: GoatCounter, בלי עוגיות ובלי מידע אישי.
   הסימנים המסחריים שייכים לבעליהם ומוצגים לצורך זיהוי המותג בלבד.
 </footer></div>
 <script src="data.js"></script>
@@ -597,7 +597,7 @@ function go(n){
   { const tr=$(".top-restart"); if(tr) tr.hidden=(n===1); }
   const tn=n==="1b"?1:n;
   $$(".tab").forEach(b=>{const k=+b.dataset.go;b.classList.toggle("on",k===tn);b.disabled=(k===2&&!S.style)||(k>=3&&!bodyValid());});
-  if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4){$("#filters").open=false;renderResults(false);}
+  if(n===2)drawAvatar(); if(n===3)refreshSearch(); if(n===4){$("#filters").open=false;renderResults(false);track(`results/${S.style}${S.style==="mtb"&&S.disc&&S.disc!=="any"?"-"+S.disc:""}`,"תוצאות");}
   chips(); updateFab(false); window.scrollTo({top:0,behavior:"smooth"});
 }
 $$("[data-go]").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.go)));
@@ -886,13 +886,16 @@ function openLeave(c){
   const a=c.querySelector("a.go-link"), m=document.getElementById("leaveModal"); if(!a||!m) return;
   document.getElementById("leaveWhat").innerHTML=`${c.querySelector(".bb").textContent} ${c.querySelector(".bc-name").textContent}<small>${c.querySelector(".seller").textContent}</small>`;
   document.getElementById("leaveGo").href=a.href;
+  Object.assign(m.dataset,{seller:c.dataset.seller||"",brand:c.dataset.brand||"",model:c.dataset.model||""});
   m.hidden=false; document.getElementById("leaveGo").focus();
 }
 function closeLeave(){const m=document.getElementById("leaveModal"); if(m) m.hidden=true;}
 document.addEventListener("click",e=>{
   const m=document.getElementById("leaveModal"); if(!m||m.hidden) return;
-  if(e.target.closest("#leaveGo")) closeLeave();                 // the link itself opens the new tab
-  else if(e.target.closest("#leaveDeals")){closeLeave(); showDeals();}
+  if(e.target.closest("#leaveGo")){                               // the link itself opens the new tab
+    track(`out/${m.dataset.seller}/${m.dataset.brand} ${m.dataset.model}`, `יציאה ל${m.dataset.seller}: ${m.dataset.brand} ${m.dataset.model}`);
+    closeLeave();}
+  else if(e.target.closest("#leaveDeals")){closeLeave(); track(`deals/${S.style||"none"}`,"פינת המבצעים"); showDeals();}
   else if(e.target.closest("#leaveModal .modal-x")||e.target===m) closeLeave();
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape") closeLeave();});
@@ -1045,7 +1048,8 @@ function card(b,missing){
   const seller=b.usd?"ישיר מהיצרן · גרמניה":`משווק: ${b.src}`;
   const name=b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"");
   // fixed card rows (same position on every card): head · name · tier · price · specs · notes · link
-  return `<article class="bcard">
+  const da=s=>String(s).replace(/"/g,"&quot;");
+  return `<article class="bcard" data-seller="${da(b.usd?"Canyon (direct)":b.src)}" data-brand="${da(b.b)}" data-model="${da(name)}">
     <header class="bc-head"><span class="bc-logo">${LOGOS[b.b]?brandLogo(b.b,true):`<span class="wlogo wtext">${b.b}</span>`}</span>
       <div class="bc-id"><div class="bb" title="${b.b}">${b.b}</div><div class="seller" title="${seller}">${seller}</div></div></header>
     <h3 class="bc-name" title="${name.replace(/"/g,"&quot;")}">${name}</h3>
@@ -1152,5 +1156,10 @@ drawRing();chips();
 </script>
 <button type="button" class="fab" id="fab" disabled aria-label="המשך לשלב הבא"><span>המשך<small dir="ltr">‹</small></span></button>
 <script>if(typeof updateFab==="function")updateFab(false);</script>
+<script>
+/* anonymous statistics (GoatCounter, no cookies, no personal data): page views, searches by style, exits to sellers */
+function track(path,title){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path,title:title||path,event:true});}catch(e){}}
+</script>
+<script data-goatcounter="https://bikefinder.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
