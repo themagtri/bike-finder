@@ -1075,6 +1075,7 @@ function card(b,missing){
     <div class="bc-size">${sizeFit(b)}</div>
     <div class="bc-notes">
       ${b.fs?`<div class="psub">שלדה בלבד</div>`:""}
+      ${b.pn?`<div class="psub">${b.pn}</div>`:""}
       ${b.fill?`<div class="psub">המפרט לפי ${b.fill} (אותו דגם)</div>`:""}
       ${b.gv?`<div class="psub">הילוכים: לפי <a href="${b.gv}" target="_blank" rel="noopener">מקור חיצוני ↗</a></div>`:""}
       ${b.gs?`<div class="psub">הילוכים: לפי תיאור המוצר אצל המוכר</div>`:""}
