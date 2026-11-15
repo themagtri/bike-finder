@@ -317,6 +317,18 @@ body{padding-bottom:96px}
 .wlogo{display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:4px;height:34px;padding:0 10px;min-width:84px;flex:none}
 .wlogo img{max-height:20px;max-width:96px;object-fit:contain}
 footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+footer.credits a{color:inherit}
+/* cookie consent bar (Meta Pixel only): small, bottom, never covers the continue button */
+.consent{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;align-items:center;gap:12px;background:rgba(24,24,24,.97);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--line-strong);padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));font-size:13px;line-height:1.45;color:#d8d8d8}
+.consent p{margin:0;flex:1;min-width:0}
+.consent a{color:#fff}
+.consent .cbtns{display:flex;gap:8px;flex:none}
+.consent .c-btn{font:inherit;font-size:13px;height:32px;min-width:62px;padding:0 12px;border-radius:999px;cursor:pointer;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.55)}
+.consent .c-btn:hover,.consent .c-btn:focus-visible{background:#fff;color:#141414}
+@media (max-width:560px){.consent{gap:10px;font-size:12.5px;padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.consent .cbtns{gap:6px}}
+@media (max-width:330px){.consent{flex-wrap:wrap}.consent .cbtns{width:100%}.consent .c-btn{flex:1}}
+html.consent-open .fab{bottom:calc(22px + var(--consent-h,0px))}
+html.consent-open body{padding-bottom:var(--consent-h,0px)}
 .unknown-note{color:var(--muted);font-size:13px;margin:0 0 14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .bcard{background:var(--card);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;border:1px solid transparent;transition:border-color .2s, transform .2s}
@@ -559,7 +571,7 @@ footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)
 </div>
 
 <div class="wrap"><footer class="credits">
-  צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json" target="_blank" rel="noopener">logos/credits.json</a>). סטטיסטיקה אנונימית: GoatCounter, בלי עוגיות ובלי מידע אישי.
+  צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json" target="_blank" rel="noopener">logos/credits.json</a>). סטטיסטיקה אנונימית: GoatCounter, בלי עוגיות ובלי מידע אישי.<span id="metaNote" hidden> מדידת פרסום של Meta: רק באישורך · <a href="#" id="consentSettings">הגדרות עוגיות</a>.</span> <a href="privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a>.
   הסימנים המסחריים שייכים לבעליהם ומוצגים לצורך זיהוי המותג בלבד.
 </footer></div>
 <script src="data.js"></script>
@@ -1158,8 +1170,49 @@ drawRing();chips();
 <script>if(typeof updateFab==="function")updateFab(false);</script>
 <script>
 /* anonymous statistics (GoatCounter, no cookies, no personal data): page views, searches by style, exits to sellers */
-function track(path,title){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path,title:title||path,event:true});}catch(e){}}
+/* Meta Pixel - loads ONLY after the visitor presses "אישור". While PIXEL_ID is empty the bar and the pixel stay off. */
+const PIXEL_ID="";                       // Meta Pixel ID from Events Manager (digits only)
+const CONSENT_KEY="bf_consent_v1";
+function getConsent(){try{return localStorage.getItem(CONSENT_KEY);}catch(e){return null;}}
+function setConsent(v){try{localStorage.setItem(CONSENT_KEY,v);}catch(e){}}
+function loadPixel(){
+  if(!PIXEL_ID||window.fbq) return;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
+  s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");
+  fbq("init",PIXEL_ID); fbq("track","PageView");
+}
+function metaEvent(name,params){try{if(window.fbq&&getConsent()==="granted")fbq("track",name,params||{});}catch(e){}}
+function consentBar(show){
+  const c=document.getElementById("consent"), root=document.documentElement; if(!c) return;
+  c.hidden=!show; root.classList.toggle("consent-open",show);
+  const fit=()=>root.style.setProperty("--consent-h",(c.hidden?0:c.offsetHeight)+"px");
+  fit(); if(show&&!consentBar.bound){consentBar.bound=true; window.addEventListener("resize",fit);}
+}
+function consentInit(){
+  if(!PIXEL_ID) return;
+  const n=document.getElementById("metaNote"); if(n) n.hidden=false;
+  const v=getConsent(); if(v==="granted") loadPixel(); else if(!v) consentBar(true);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",consentInit); else consentInit();
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-consent]");
+  if(b){const was=getConsent(), v=b.dataset.consent; setConsent(v); consentBar(false);
+    if(v==="granted") loadPixel(); else if(was==="granted") location.reload();   // a loaded pixel can't be unloaded: reload without it
+    return;}
+  if(e.target.closest("#consentSettings")){e.preventDefault(); consentBar(true);}
+});
+function track(path,title){
+  try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:path,title:title||path,event:true});}catch(e){}
+  // the same moments for Meta (only with consent): a search reaching results, and a click-through to a seller
+  if(path.startsWith("results/")) metaEvent("Search",{search_string:path.slice(8)});
+  else if(path.startsWith("out/")) metaEvent("Lead",{content_name:path.slice(4).split("/").slice(1).join("/"),content_category:path.slice(4).split("/")[0]});
+}
 </script>
+<div class="consent" id="consent" hidden role="region" aria-label="הסכמה לעוגיות">
+  <p>אנחנו משתמשים בעוגיות של Meta לשיפור הפרסום. <a href="privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a></p>
+  <div class="cbtns"><button type="button" class="c-btn" data-consent="granted">אישור</button><button type="button" class="c-btn" data-consent="denied">דחייה</button></div>
+</div>
 <script data-goatcounter="https://bikefinder.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
