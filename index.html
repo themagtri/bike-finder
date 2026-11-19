@@ -534,7 +534,7 @@ table.cmptab .cb{display:block;font-size:11px;color:var(--muted)}
     <p class="lead">בחר לפי תקציב או לפי רמת אבזור, ואז העדפות של גלגלים ומשקל. אפשר לשנות הכל גם בעמוד התוצאות.</p>
     <div class="modes" role="group" aria-label="סוג חיפוש">
       <button class="mode" data-mode="budget" aria-pressed="true"><span class="mode-img" style="background-image:url('https://images.unsplash.com/photo-1650706860147-2571c6a7a83e?auto=format&fit=crop&w=600&q=70')"></span><h3>לפי תקציב</h3><p>כמה אתה מוכן להשקיע</p></button>
-      <button class="mode" data-mode="tier" aria-pressed="false"><span class="mode-img" style="background-image:url('https://images.unsplash.com/photo-1771744274067-4d1fcf73687d?auto=format&fit=crop&w=600&q=70')"></span><h3>לפי רמת אבזור</h3><p id="tierModeSub">בסיס, ביניים, גבוה או עילית</p></button>
+      <button class="mode" data-mode="tier" aria-pressed="false"><span class="mode-img" style="background-image:url('https://images.unsplash.com/photo-1771744274067-4d1fcf73687d?auto=format&fit=crop&w=600&q=70')"></span><h3>לפי רמת אבזור</h3><p id="tierModeSub">בסיס, ביניים, גבוה או קצה</p></button>
     </div>
     <div class="panel on" id="pBudget">
       <div class="label">טווח מחירים</div>
@@ -672,7 +672,7 @@ const STYLES = [
   {k:"mtb",   he:"הרים",             sub:"שבילים, XC ואנדורו",   img:IMG("photo-1760462568686-f16dfaf44678"), fx:.5, fy:.5},
   {k:"emtb",  he:"הרים חשמליים",     sub:"שטח עם מנוע עזר",      img:IMG("photo-1792022839662-70f86f638ff5")},
 ];
-const TIERS=[{n:1,he:"בסיס",en:"Entry"},{n:2,he:"ביניים",en:"Mid"},{n:3,he:"גבוה",en:"High"},{n:4,he:"עילית",en:"Elite"}];
+const TIERS=[{n:1,he:"בסיס",en:"Entry"},{n:2,he:"ביניים",en:"Mid"},{n:3,he:"גבוה",en:"High"},{n:4,he:"קצה",en:"Elite"}];
 // agreed tier table (trim_levels.md) - definitions unchanged
 const TIER_ROWS=[
   // gravel row added with the user's approval 2026-11-15: GRX tiers match road tiers, SRAM keeps its road ladder (XPLR)
@@ -1092,7 +1092,7 @@ function refreshSearch(){
   const st=styleOf(S.style),rows=rowsFor();
   if(!hasTiers()&&S.mode==="tier")S.mode="budget";
   { const tm=$(".mode[data-mode='tier']"); tm.hidden=!hasTiers(); tm.disabled=false; }
-  $("#tierModeSub").textContent=hasTiers()?"בסיס, ביניים, גבוה או עילית":`אין עדיין טבלת רמות ל${st.he}`;
+  $("#tierModeSub").textContent=hasTiers()?"בסיס, ביניים, גבוה או קצה":`אין עדיין טבלת רמות ל${st.he}`;
   $("#bChips").innerHTML=BUDGETS.map((b,i)=>`<button data-i="${i}" aria-pressed="${(S.bMin||0)===b[0]&&S.bMax===b[1]}">${b[2]} ₪</button>`).join("");
   $$("#bChips button").forEach(x=>x.addEventListener("click",()=>{const b=BUDGETS[+x.dataset.i];S.bMin=b[0]||null;S.bMax=b[1];$("#bMin").value=S.bMin??"";$("#bMax").value=S.bMax??"";refreshAll();}));
   const exRow=TIER_ROWS.find(r=>rows.includes(r.k));  // sample groupset from the chosen style's row
