@@ -662,7 +662,8 @@ table.cmptab .cb{display:block;font-size:11px;color:var(--muted)}
 <script>
 (function(){
 const BIKES = window.BIKES || [];
-const IMG = id => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=70`;
+// photo size: 700px wide is enough for the ring on a desktop; small tiles ask for less (saves data on phones)
+const IMG = (id,w=700) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=62`;
 const STYLES = [
   // focus: point of interest in the photo (fraction of width/height) placed at the segment centre; w = drawn width, ar = photo aspect (h/w)
   {k:"road",  he:"כביש",             sub:"מהירות על אספלט",      img:IMG("photo-1534787238916-9ba6764efd4f"), focus:{fx:.72, fy:.58, w:700, ar:506/900}},
@@ -748,7 +749,7 @@ function drawRing(){
   $$(".seg").forEach(g=>{const pick=()=>selectStyle(g.dataset.k);g.addEventListener("click",pick);
     g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}});});
   // recommendations corner: placeholder panels until real recommendations / deals exist (Unsplash photos)
-  $("#recs").innerHTML=REC_IMGS.map(id=>`<div class="rec" style="background-image:url('${IMG(id)}')"><span class="soon">בקרוב</span><span class="rt">מבצעים והמלצות</span></div>`).join("");
+  $("#recs").innerHTML=REC_IMGS.map(id=>`<div class="rec" style="background-image:url('${IMG(id,480)}')"><span class="soon">בקרוב</span><span class="rt">מבצעים והמלצות</span></div>`).join("");
 }
 /* 1b: MTB sub-type (XC / trail / enduro / don't mind) */
 const DISCS=[
@@ -1014,7 +1015,7 @@ function showDeals(){
   const st=styleOf(S.style), he=st?st.he:"";
   document.getElementById("dealsTitle").textContent=he?`מבצעים והמלצות · ${he}`:"מבצעים והמלצות";
   document.getElementById("dealsLead").textContent=he?`בקרוב: מבצעים ודגמים מומלצים של אופני ${he}, שנבחרו לפי החיפוש שלך.`:"בקרוב: מבצעים ודגמים מומלצים, שנבחרו לפי החיפוש שלך.";
-  document.getElementById("dealsList").innerHTML=(DEAL_IMGS[S.style]||REC_IMGS).map(id=>`<div class="rec" style="background-image:url('${IMG(id)}')"><span class="soon">בקרוב</span><span class="rt">${he?`מבצעים · ${he}`:"מבצעים והמלצות"}</span></div>`).join("");
+  document.getElementById("dealsList").innerHTML=(DEAL_IMGS[S.style]||REC_IMGS).map(id=>`<div class="rec" style="background-image:url('${IMG(id,480)}')"><span class="soon">בקרוב</span><span class="rt">${he?`מבצעים · ${he}`:"מבצעים והמלצות"}</span></div>`).join("");
   go("deals");
 }
 document.addEventListener("click",e=>{if(e.target.closest("#dealsBack")) go(4);});
