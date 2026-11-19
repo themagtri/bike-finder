@@ -404,6 +404,46 @@ html.consent-open body{padding-bottom:var(--consent-h,0px)}
 .go-link{margin-top:auto;font-size:13px;color:var(--text);text-decoration:none;border-top:1px solid var(--line);padding-top:12px}
 .go-link:hover{text-decoration:underline}
 .tag{font-size:12px;border:1px solid var(--line-strong);border-radius:999px;padding:1px 10px;color:var(--muted);margin-inline-start:10px;vertical-align:middle}
+/* favorites (heart) and compare (up to 3), kept in this browser only */
+.bcard{position:relative}
+.bc-head{padding-inline-end:40px}
+.fav-btn{position:absolute;top:14px;inset-inline-end:14px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line-strong);background:transparent;color:var(--text);display:grid;place-items:center;cursor:pointer;padding:0}
+.fav-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+.fav-btn:hover{border-color:#fff}
+.fav-btn[aria-pressed="true"]{color:#ff5c7a;border-color:#ff5c7a}
+.fav-btn[aria-pressed="true"] svg{fill:currentColor}
+.bc-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:10px}
+.bc-foot .go-link{margin:0;border:0;padding:0}
+.cmp-btn{border:1px solid var(--line-strong);background:transparent;color:var(--text);border-radius:999px;padding:4px 12px;font-size:12px;min-height:32px;cursor:pointer;white-space:nowrap}
+.cmp-btn:hover{border-color:#fff}
+.cmp-btn[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.tray{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + var(--consent-h,0px));z-index:41;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 24px)}
+.tray[hidden],.tray [hidden]{display:none}
+.tray-btn{border:0;border-radius:999px;background:#fff;color:#141414;font-size:14px;font-weight:600;padding:9px 16px;min-height:44px;box-shadow:0 6px 24px rgba(0,0,0,.45);cursor:pointer;white-space:nowrap}
+.tray-btn .h{color:#e0244a}
+.tray-x{width:32px;height:32px;border-radius:50%;border:1px solid var(--line-strong);background:#1d1d1d;color:var(--text);font-size:14px;line-height:1;cursor:pointer;padding:0;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.tray-mini{border:1px solid var(--line-strong);border-radius:999px;background:#1d1d1d;color:var(--text);font-size:13px;font-weight:600;padding:6px 14px;min-height:36px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.tray-mini .h{color:#ff5c7a}
+.modal-box.wide{max-width:760px;max-height:calc(100vh - 32px);overflow:auto}
+.modal-box.wide h3{margin:0 40px 6px 0;font-weight:400;font-size:22px}
+.dlg-note{color:var(--muted);font-size:14px}
+.cmp-tools{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:4px 0 10px}
+.cmp-scroll{overflow-x:auto}
+table.cmptab{border-collapse:collapse;width:100%;table-layout:fixed;font-size:13px;min-width:calc(96px + var(--n,2) * 150px)}
+table.cmptab th,table.cmptab td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:start;vertical-align:top;overflow-wrap:anywhere}
+table.cmptab thead th{vertical-align:bottom;border-bottom:1px solid var(--line-strong);font-weight:500}
+table.cmptab .rh{width:96px;position:sticky;inset-inline-start:0;background:#1c1c1c;color:var(--muted);font-weight:400;z-index:1}
+table.cmptab tr.diff td{font-weight:600}
+table.cmptab tr.diff td,table.cmptab tr.diff .rh{background:#262626}
+table.cmptab .cb{display:block;font-size:11px;color:var(--muted)}
+.cmp-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mini-btn{border:1px solid var(--line-strong);background:transparent;color:var(--text);border-radius:999px;font-size:12px;padding:4px 10px;min-height:30px;cursor:pointer;white-space:nowrap}
+.mini-btn.go{background:#fff;color:#141414;border-color:#fff}
+.mini-btn:hover{border-color:#fff}
+.fav-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px}
+.fav-list li{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.fav-list small{display:block;color:var(--muted);font-size:12px}
+@media (max-width:560px){table.cmptab{min-width:calc(78px + var(--n,2) * 120px);font-size:12px}table.cmptab .rh{width:78px}table.cmptab th,table.cmptab td{padding:8px 6px}.tray-btn{font-size:13px;padding:8px 12px}}
 </style>
 </head>
 <body>
@@ -739,6 +779,7 @@ function selectDisc(d){
 }
 let CUR=1;
 function updateFab(pulse){
+  refreshTray();
   const f=$("#fab"); if(!f) return;
   f.hidden=(CUR===4||CUR==="deals");
   const ok=CUR===1?!!S.pick:CUR==="1b"?!!S.discPick:CUR===2?bodyValid():CUR===3?!$("#showRes").disabled:false;
@@ -941,10 +982,16 @@ document.addEventListener("click",e=>{const c=e.target.closest(".bcard"); if(!c)
   const goLink=e.target.closest("a.go-link"); if(!goLink&&e.target.closest("a,button")) return;   // other inner links keep working
   e.preventDefault(); openLeave(c);});
 function openLeave(c){
-  const a=c.querySelector("a.go-link"), m=document.getElementById("leaveModal"); if(!a||!m) return;
-  document.getElementById("leaveWhat").innerHTML=`${c.querySelector(".bb").textContent} ${c.querySelector(".bc-name").textContent}<small>${c.querySelector(".seller").textContent}</small>`;
-  document.getElementById("leaveGo").href=a.href;
-  Object.assign(m.dataset,{seller:c.dataset.seller||"",brand:c.dataset.brand||"",model:c.dataset.model||""});
+  const a=c.querySelector("a.go-link"); if(!a) return;
+  openLeaveData(c.querySelector(".bb").textContent, c.querySelector(".bc-name").textContent, c.querySelector(".seller").textContent, a.href,
+    {seller:c.dataset.seller||"",brand:c.dataset.brand||"",model:c.dataset.model||""});
+}
+function openLeaveData(brand,name,sellerTxt,href,ds){
+  const m=document.getElementById("leaveModal"); if(!m) return;
+  const w=document.getElementById("leaveWhat"); w.textContent=brand+" "+name;
+  const sm=document.createElement("small"); sm.textContent=sellerTxt; w.appendChild(sm);
+  document.getElementById("leaveGo").href=href;
+  Object.assign(m.dataset,ds);
   m.hidden=false; document.getElementById("leaveGo").focus();
 }
 function closeLeave(){const m=document.getElementById("leaveModal"); if(m) m.hidden=true;}
@@ -1107,7 +1154,9 @@ function card(b,missing){
   const name=b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"");
   // fixed card rows (same position on every card): head · name · tier · price · specs · notes · link
   const da=s=>String(s).replace(/"/g,"&quot;");
+  const k=keyOf(b), fv=FAVS.has(k), cm=CMPS.includes(k);
   return `<article class="bcard" data-seller="${da(b.usd?"Canyon (direct)":b.src)}" data-brand="${da(b.b)}" data-model="${da(name)}">
+    <button type="button" class="fav-btn" data-fav="${da(k)}" aria-pressed="${fv}" aria-label="${fv?"הסרה מהמועדפים":"הוספה למועדפים"}: ${da(b.b+" "+name)}">${HEART}</button>
     <header class="bc-head"><span class="bc-logo">${LOGOS[b.b]?brandLogo(b.b,true):`<span class="wlogo wtext">${b.b}</span>`}</span>
       <div class="bc-id"><div class="bb" title="${b.b}">${b.b}</div><div class="seller" title="${seller}">${seller}</div></div></header>
     <h3 class="bc-name" title="${name.replace(/"/g,"&quot;")}">${name}</h3>
@@ -1124,7 +1173,8 @@ function card(b,missing){
       ${b.fv?`<div class="psub">חומר שלדה: לפי <a href="${b.fv.u}" target="_blank" rel="noopener" title="${b.fv.t.replace(/"/g,"&quot;")}">מקור חיצוני ↗</a></div>`:""}
       ${missing&&missing.length?`<div class="miss">חסר באתר המוכר: ${missing.join(", ")}</div>`:""}
     </div>
-    <a class="go-link" href="${b.u}" target="_blank" rel="noopener">לדף המוצר ↗</a>
+    <div class="bc-foot"><a class="go-link" href="${b.u}" target="_blank" rel="noopener">לדף המוצר ↗</a>
+      <button type="button" class="cmp-btn" data-cmp="${da(k)}" aria-pressed="${cm}">${cm?"✓ בהשוואה":"+ השוואה"}</button></div>
   </article>`;
 }
 function setupRange(){
@@ -1179,9 +1229,121 @@ function refreshAll(){ if($("#s4").classList.contains("on")) renderResults(true)
 window.__size={road:SIZE_ROAD,mtb:SIZE_MTB,style:()=>S.style,isRoadish};   // for the optional size-help pop-up (separate script)
 { const fb=$("#filterBtn"), fl=$("#filters"), sync=()=>fb.setAttribute("aria-expanded",fl.open);
   fb.addEventListener("click",()=>{fl.open=!fl.open;sync();}); fl.addEventListener("toggle",sync); sync(); }
+/* ---------- favorites (heart) and compare (up to 3 models) - kept in this browser only ---------- */
+function keyOf(b){ return (b.usd?"Canyon (direct)":b.src)+"|"+b.b+"|"+b.n; }
+var ALLB=new Map(BIKES.map(b=>[keyOf(b),b]));
+const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>';
+const CMP_MAX=3;
+function lsGet(k){ try{ const v=JSON.parse(localStorage.getItem(k)||"[]"); return Array.isArray(v)?v.filter(x=>ALLB.has(x)):[]; }catch(e){ return []; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+var FAVS=new Set(lsGet("bf_fav_v1")), CMPS=lsGet("bf_cmp_v1").slice(0,CMP_MAX), TRAY_MIN=false;
+try{ TRAY_MIN=sessionStorage.getItem("bf_traymin")==="1"; }catch(e){}
+const escH=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nameOf=b=>b.n.replace(new RegExp("^"+b.b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*","i"),"");
+const sellerOf=b=>b.usd?"ישיר מהיצרן · גרמניה":b.src;
+const priceOf=b=>b.est?`≈ ₪${fmt(b.p)}`:b.p!=null?`${b.pf?"החל מ-":""}₪${fmt(b.p)}`:"מחיר לא ידוע";
+function say(msg){ const s=$("#trayMsg"); if(!s) return; s.textContent=""; setTimeout(()=>{ s.textContent=msg; },50); }
+function toggleFav(k){
+  if(FAVS.has(k)){ FAVS.delete(k); say("הוסר מהמועדפים"); } else { FAVS.add(k); TRAY_MIN=false; say("נוסף למועדפים"); }
+  lsSet("bf_fav_v1",[...FAVS]); refreshMarks(); if(!$("#favModal").hidden) renderFav();
+}
+function toggleCmp(k){
+  if(CMPS.includes(k)){ CMPS=CMPS.filter(x=>x!==k); say("הוסר מההשוואה"); }
+  else { if(CMPS.length>=CMP_MAX){ say(`אפשר להשוות עד ${CMP_MAX} דגמים. הסר אחד כדי להוסיף`); flashTray(); return; }
+    CMPS.push(k); TRAY_MIN=false; say(`נוסף להשוואה (${CMPS.length} מתוך ${CMP_MAX})`); }
+  lsSet("bf_cmp_v1",CMPS); refreshMarks(); if(!$("#cmpModal").hidden) renderCmp();
+}
+function flashTray(){ const b=$("#trayCmp"); if(b&&!b.hidden){ b.animate&&b.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}],{duration:350}); } }
+function refreshMarks(){
+  $$(".fav-btn[data-fav]").forEach(b=>{ const on=FAVS.has(b.dataset.fav), x=ALLB.get(b.dataset.fav); b.setAttribute("aria-pressed",on);
+    if(x) b.setAttribute("aria-label",(on?"הסרה מהמועדפים":"הוספה למועדפים")+": "+x.b+" "+nameOf(x)); });
+  $$(".cmp-btn[data-cmp]").forEach(b=>{ const on=CMPS.includes(b.dataset.cmp); b.setAttribute("aria-pressed",on); b.textContent=on?"✓ בהשוואה":"+ השוואה"; });
+  refreshTray();
+}
+function refreshTray(){
+  const tr=$("#tray"); if(!tr||!FAVS) return;
+  const any=CMPS.length||FAVS.size, screen=(CUR===4||CUR==="deals");
+  tr.hidden=!(any&&screen);
+  $("#trayCmp").hidden=TRAY_MIN||!CMPS.length; $("#trayCmp .n").textContent=CMPS.length;
+  $("#trayFav").hidden=TRAY_MIN||!FAVS.size; $("#trayFav .n").textContent=FAVS.size;
+  $("#trayHide").hidden=TRAY_MIN; $("#trayShow").hidden=!TRAY_MIN;
+  $("#miniTxt").innerHTML=[CMPS.length?`⚖ ${CMPS.length}`:"",FAVS.size?`<span class="h">♥</span> ${FAVS.size}`:""].filter(Boolean).join(" · ");
+}
+function setTrayMin(v,focusId){ TRAY_MIN=v; try{ sessionStorage.setItem("bf_traymin",v?"1":"0"); }catch(e){} refreshTray(); const f=focusId&&$("#"+focusId); if(f) f.focus(); }
+function cmpRows(){
+  return [["מחיר",priceOf],["משווק",sellerOf],["סגנון",b=>(STYLES.find(s=>s.k===b.s)||{}).he||"—"],
+    ["רמת ציוד",b=>b.t?`${b.t} · ${TIERS[b.t-1].he}`:"—"],["הילוכים",b=>b.g||"—"],
+    ["העברת הילוכים",b=>b.es===1?"חשמלית":b.es===0?"מכנית":"—"],["שלדה",b=>MAT[b.f]||"—"],
+    ["שיכוך",b=>(b.s==="mtb"||b.s==="emtb")?(SUS_HE[b.susp]||"—"):"לא רלוונטי"],
+    ["גלגלים",b=>b.cw===1?"קרבון":b.cw===0?"אלומיניום":"—"],["משקל",b=>b.w?`${b.w} ק"ג`:"—"],
+    ["הערה",b=>[b.old?"דגם עודפים":"",b.fs?"שלדה בלבד":"",b.pn||""].filter(Boolean).join(" · ")||"—"]];
+}
+function renderCmp(){
+  const bs=CMPS.map(k=>[k,ALLB.get(k)]).filter(x=>x[1]), box=$("#cmpBody");
+  if(!bs.length){ box.innerHTML='<p class="dlg-note">אין עדיין דגמים בהשוואה. לחץ "+ השוואה" בכרטיס.</p>'; return; }
+  const only=$("#cmpOnly").checked;
+  const head=`<tr><th class="rh" scope="col"><span class="sr-only">מאפיין</span></th>${bs.map(([k,b])=>`<th scope="col"><span class="cb">${escH(b.b)}</span>${escH(nameOf(b))}
+    <div class="cmp-acts"><button type="button" class="mini-btn go" data-leavek="${escH(k)}">לדף המוצר ↗</button>
+    <button type="button" class="mini-btn" data-cmp="${escH(k)}" aria-label="הסרה מההשוואה: ${escH(b.b+" "+nameOf(b))}">הסרה ✕</button></div></th>`).join("")}</tr>`;
+  const rows=cmpRows().map(([lbl,f])=>{ const v=bs.map(([,b])=>String(f(b))), diff=bs.length>1&&new Set(v).size>1;
+    if(only&&!diff) return ""; return `<tr class="${diff?"diff":""}"><th class="rh" scope="row">${lbl}</th>${v.map(x=>`<td>${escH(x)}</td>`).join("")}</tr>`; }).join("");
+  box.innerHTML=`<div class="cmp-scroll"><table class="cmptab" style="--n:${bs.length}"><caption class="sr-only">השוואה בין ${bs.length} דגמים</caption><thead>${head}</thead><tbody>${rows||`<tr><td colspan="${bs.length+1}">אין הבדלים בשורות שמוצגות.</td></tr>`}</tbody></table></div>
+    ${bs.length<CMP_MAX?`<p class="dlg-note">אפשר להוסיף עד ${CMP_MAX} דגמים. שורות שבהן יש הבדל מודגשות.</p>`:`<p class="dlg-note">שורות שבהן יש הבדל מודגשות.</p>`}`;
+}
+function renderFav(){
+  const bs=[...FAVS].map(k=>[k,ALLB.get(k)]).filter(x=>x[1]);
+  $("#favBody").innerHTML=bs.length?`<ul class="fav-list">${bs.map(([k,b])=>`<li><div><small>${escH(b.b)} · ${escH(sellerOf(b))}</small><b>${escH(nameOf(b))}</b><small>${escH(priceOf(b))}</small></div>
+    <div class="cmp-acts"><button type="button" class="mini-btn go" data-leavek="${escH(k)}">לדף המוצר ↗</button>
+    <button type="button" class="mini-btn cmp-btn" data-cmp="${escH(k)}" aria-pressed="${CMPS.includes(k)}">${CMPS.includes(k)?"✓ בהשוואה":"+ השוואה"}</button>
+    <button type="button" class="mini-btn" data-fav="${escH(k)}" aria-label="הסרה מהמועדפים: ${escH(b.b+" "+nameOf(b))}">הסרה ✕</button></div></li>`).join("")}</ul>
+    <p class="dlg-note">המועדפים נשמרים רק בדפדפן הזה.</p>`
+    :'<p class="dlg-note">אין עדיין מועדפים. לחץ על הלב בכרטיס.</p>';
+}
+function openPop(id,render){ render(); const m=$("#"+id); m.hidden=false; const x=m.querySelector(".modal-x"); if(x) x.focus(); }
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.fav&&!b.closest("#leaveModal")){ toggleFav(b.dataset.fav); return; }
+  if(b.dataset.cmp){ toggleCmp(b.dataset.cmp); if(b.closest("#favModal")) renderFav(); return; }
+  if(b.dataset.leavek){ const x=ALLB.get(b.dataset.leavek); if(!x) return; $("#cmpModal").hidden=true; $("#favModal").hidden=true;
+    openLeaveData(x.b,nameOf(x),x.usd?"ישיר מהיצרן · גרמניה":`משווק: ${x.src}`,x.u,{seller:x.usd?"Canyon (direct)":x.src,brand:x.b,model:nameOf(x)}); return; }
+  if(b.id==="trayCmp"){ openPop("cmpModal",renderCmp); track("tools/compare","השוואת דגמים"); return; }
+  if(b.id==="trayFav"){ openPop("favModal",renderFav); track("tools/favorites","מועדפים"); return; }
+  if(b.id==="trayHide"){ setTrayMin(true,"trayShow"); return; }
+  if(b.id==="trayShow"){ setTrayMin(false,CMPS.length?"trayCmp":"trayFav"); return; }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ ["cmpModal","favModal"].forEach(id=>{ const m=$("#"+id); if(m) m.hidden=true; }); } });
+// the tray and the two pop-ups sit after this script in the page: bind them once the page is parsed
+document.addEventListener("DOMContentLoaded",()=>{
+  ["cmpModal","favModal"].forEach(id=>{ const m=$("#"+id);
+    m.addEventListener("click",e=>{ if(e.target===m||e.target.closest(".modal-x")) m.hidden=true; }); });
+  $("#cmpOnly").addEventListener("change",renderCmp);
+  refreshTray();
+});
 drawRing();chips();
 })();
 </script>
+<div class="tray" id="tray" hidden>
+  <button class="tray-btn" type="button" id="trayCmp" hidden><span aria-hidden="true">⚖</span> השוואה (<span class="n">0</span>)</button>
+  <button class="tray-btn" type="button" id="trayFav" hidden><span class="h" aria-hidden="true">♥</span> מועדפים (<span class="n">0</span>)</button>
+  <button class="tray-x" type="button" id="trayHide" aria-label="מזעור הכפתורים של ההשוואה והמועדפים">✕</button>
+  <button class="tray-mini" type="button" id="trayShow" hidden aria-label="הצגת ההשוואה והמועדפים"><span aria-hidden="true" id="miniTxt"></span></button>
+</div>
+<p class="sr-only" id="trayMsg" role="status" aria-live="polite"></p>
+<div class="modal" id="cmpModal" hidden role="dialog" aria-modal="true" aria-labelledby="cmpTitle">
+  <div class="modal-box wide">
+    <button type="button" class="modal-x" aria-label="סגירה">✕</button>
+    <h3 id="cmpTitle">השוואת דגמים</h3>
+    <label class="cmp-tools"><input type="checkbox" id="cmpOnly"> להציג רק את ההבדלים</label>
+    <div id="cmpBody"></div>
+  </div>
+</div>
+<div class="modal" id="favModal" hidden role="dialog" aria-modal="true" aria-labelledby="favTitle">
+  <div class="modal-box wide">
+    <button type="button" class="modal-x" aria-label="סגירה">✕</button>
+    <h3 id="favTitle">המועדפים שלי</h3>
+    <div id="favBody"></div>
+  </div>
+</div>
 <div class="modal" id="leaveModal" hidden role="dialog" aria-modal="true" aria-label="מעבר לאתר המוכר">
   <div class="modal-box">
     <button type="button" class="modal-x" aria-label="סגירה">✕</button>
