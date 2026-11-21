@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://israbike.com/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/road/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/road/up-to-10000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/road/10000-20000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/road/over-20000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/tt/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/gravel/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/gravel/up-to-10000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/gravel/10000-20000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/gravel/over-20000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/up-to-5000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/5000-10000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/10000-20000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/over-20000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/xc/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/trail/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/mtb/enduro/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/emtb/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/emtb/up-to-20000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/emtb/20000-30000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/emtb/over-30000/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/emtb/xc/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/emtb/trail/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://israbike.com/emtb/enduro/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://israbike.com/terms.html</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://israbike.com/accessibility.html</loc><lastmod>2026-11-21</lastmod></url>
 </urlset>

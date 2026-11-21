@@ -325,6 +325,7 @@ body{padding-bottom:96px}
 .blogo.img::after{content:none}
 .wlogo{display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:4px;height:34px;padding:0 10px;min-width:84px;flex:none}
 .wlogo img{max-height:20px;max-width:96px;object-fit:contain}
+.guides{margin-top:56px;padding-top:18px;border-top:1px solid var(--line)}.guides h2{font-weight:400;font-size:18px;margin:0 0 12px}.guides ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}.guides a{display:inline-block;border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--muted);text-decoration:none}.guides a:hover{color:var(--text);border-color:#fff}
 footer.credits{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
 footer.credits a{color:inherit}
 /* ---- accessibility (IS 5568 / WCAG 2.0 AA) ---- */
@@ -655,7 +656,7 @@ table.cmptab .cb{display:block;font-size:11px;color:var(--muted)}
   </main>
 </div>
 
-<div class="wrap"><footer class="credits">
+<div class="wrap"><!--guides--><nav class="guides" aria-label="מדריכי דגמים ומחירים"><h2>כל הדגמים לפי סגנון ומחיר</h2><ul><li><a href="/road/">אופני כביש בישראל</a></li><li><a href="/road/up-to-10000/">אופני כביש עד 10,000 ₪</a></li><li><a href="/road/10000-20000/">אופני כביש 10,000–20,000 ₪</a></li><li><a href="/road/over-20000/">אופני כביש מעל 20,000 ₪</a></li><li><a href="/tt/">אופני נג&quot;ש / טריאתלון בישראל</a></li><li><a href="/gravel/">אופני גראבל בישראל</a></li><li><a href="/gravel/up-to-10000/">אופני גראבל עד 10,000 ₪</a></li><li><a href="/gravel/10000-20000/">אופני גראבל 10,000–20,000 ₪</a></li><li><a href="/gravel/over-20000/">אופני גראבל מעל 20,000 ₪</a></li><li><a href="/mtb/">אופני הרים בישראל</a></li><li><a href="/mtb/up-to-5000/">אופני הרים עד 5,000 ₪</a></li><li><a href="/mtb/5000-10000/">אופני הרים 5,000–10,000 ₪</a></li><li><a href="/mtb/10000-20000/">אופני הרים 10,000–20,000 ₪</a></li><li><a href="/mtb/over-20000/">אופני הרים מעל 20,000 ₪</a></li><li><a href="/mtb/xc/">אופני הרים קרוס קאנטרי (XC)</a></li><li><a href="/mtb/trail/">אופני הרים טרייל</a></li><li><a href="/mtb/enduro/">אופני הרים אנדורו</a></li><li><a href="/emtb/">אופני הרים חשמליים בישראל</a></li><li><a href="/emtb/up-to-20000/">אופני הרים חשמליים עד 20,000 ₪</a></li><li><a href="/emtb/20000-30000/">אופני הרים חשמליים 20,000–30,000 ₪</a></li><li><a href="/emtb/over-30000/">אופני הרים חשמליים מעל 30,000 ₪</a></li><li><a href="/emtb/xc/">אופני הרים חשמליים קרוס קאנטרי (XC)</a></li><li><a href="/emtb/trail/">אופני הרים חשמליים טרייל</a></li><li><a href="/emtb/enduro/">אופני הרים חשמליים אנדורו</a></li></ul></nav><!--/guides--><footer class="credits">
   צילומים: Unsplash. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json" target="_blank" rel="noopener">logos/credits.json</a>). סטטיסטיקה אנונימית: GoatCounter, בלי עוגיות ובלי מידע אישי.<span id="metaNote" hidden> מדידת פרסום של Meta: רק באישורך · <a href="#" id="consentSettings">הגדרות עוגיות</a>.</span> <a href="privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a> · <a href="terms.html" target="_blank" rel="noopener">תנאי שימוש</a> · <a href="accessibility.html" target="_blank" rel="noopener">הצהרת נגישות</a>.
   הסימנים המסחריים שייכים לבעליהם ומוצגים לצורך זיהוי המותג בלבד.
 </footer></div>
@@ -1322,6 +1323,15 @@ document.addEventListener("DOMContentLoaded",()=>{
   refreshTray();
 });
 drawRing();chips();
+/* deep link from the guide pages (/road/, /mtb/xc/ ...): #s=road&min=5000&max=10000&d=xc opens the results directly */
+document.addEventListener("DOMContentLoaded",function(){   // after the whole page is parsed (track() is defined further down)
+  const m=location.hash.match(/^#s=(road|tt|gravel|mtb|emtb)(?:&min=(\d+))?(?:&max=(\d+))?(?:&d=(xc|trail|enduro))?$/); if(!m) return;
+  Object.assign(S,{style:m[1],disc:m[4]||"any",sus:"any",mode:"budget",bMin:m[2]?+m[2]:null,bMax:m[3]?+m[3]:null,shownU:24,openU:false});
+  $("#bMin").value=S.bMin??""; $("#bMax").value=S.bMax??"";
+  S.shown=24; S.rMin=S.bMin; S.rMax=S.bMax;
+  try{ history.replaceState(null,"",location.pathname); }catch(e){}
+  chips(); go(4);
+});
 })();
 </script>
 <div class="tray" id="tray" hidden>
